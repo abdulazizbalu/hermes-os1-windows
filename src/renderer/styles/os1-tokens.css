@@ -1,0 +1,28 @@
+:root {
+  --os1-bg-cream: #d9c9ad;
+  --os1-bg-beige: #cfc0a6;
+  --os1-coral: #c65a43;
+  --os1-coral-500: #c1553d;
+  --os1-coral-400: #d87660;
+  --os1-coral-300: #e6ad86;
+  --os1-coral-600: #a84832;
+  --os1-on-coral-primary: rgba(255, 255, 255, 0.95);
+  --os1-on-coral-secondary: rgba(255, 255, 255, 0.7);
+  --os1-on-coral-muted: rgba(255, 255, 255, 0.5);
+  --os1-on-cream-primary: rgba(56, 40, 30, 0.92);
+  --os1-on-cream-secondary: rgba(72, 56, 44, 0.72);
+  --os1-on-cream-muted: rgba(88, 72, 60, 0.5);
+  --os1-glass-fill: rgba(255, 255, 255, 0.1);
+  --os1-glass-border: rgba(255, 255, 255, 0.3);
+  --os1-glass-fill-hover: rgba(255, 255, 255, 0.2);
+  --os1-glass-border-hover: rgba(255, 255, 255, 0.5);
+  --os1-dark-overlay: rgba(40, 30, 24, 0.18);
+  --os1-warning: #e2a042;
+  --os1-danger: #c65a43;
+  --os1-success: #7ba88e;
+  --os1-font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --os1-font-mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  --os1-motion-fast: 300ms;
+  --os1-motion-medium: 600ms;
+  --os1-motion-slow: 1200ms;
+}
