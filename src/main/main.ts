@@ -14,7 +14,7 @@ function createMainWindow(): BrowserWindow {
     title: "Hermes OS1 Windows",
     backgroundColor: "#C65A43",
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
+      preload: join(__dirname, "../preload/index.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false
@@ -33,7 +33,7 @@ function createMainWindow(): BrowserWindow {
   if (isDevelopment && process.env.ELECTRON_RENDERER_URL) {
     void mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
-    void mainWindow.loadFile(join(__dirname, "../../dist/index.html"));
+    void mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
 
   return mainWindow;

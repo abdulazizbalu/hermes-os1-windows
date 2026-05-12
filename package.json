@@ -5,7 +5,7 @@
   "author": "Abdulaziz",
   "license": "MIT",
   "private": false,
-  "main": "dist-electron/main/main.js",
+  "main": "out/main/main.js",
   "type": "module",
   "scripts": {
     "dev": "electron-vite dev",
@@ -51,11 +51,11 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
+      "out/**/*",
       "package.json"
     ],
     "win": {
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
