@@ -24,6 +24,7 @@ beforeEach(() => {
       }),
       startOllama: vi.fn(),
       pullModel: vi.fn(),
+      pullModelStream: vi.fn(),
       generateText: vi.fn().mockResolvedValue({ response: "Привет! Чем помочь?" })
     },
     history: {

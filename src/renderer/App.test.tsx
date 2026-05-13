@@ -3,22 +3,31 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
+const readyStatus = {
+  ollamaInstalled: true,
+  ollamaRunning: true,
+  recommendedModel: "gemma4:e4b" as const,
+  selectedModel: "gemma4:e4b" as const,
+  version: "0.12.0",
+  models: [
+    { name: "gemma4:e2b", installed: false },
+    { name: "gemma4:e4b", installed: true, size: 9600000000 },
+    { name: "gemma4:26b", installed: false }
+  ]
+};
+
 beforeEach(() => {
+  window.localStorage.clear();
   window.os1 = {
     app: {
       info: vi.fn(),
       diagnostics: vi.fn()
     },
     localAi: {
-      status: vi.fn().mockResolvedValue({
-        ollamaInstalled: false,
-        ollamaRunning: false,
-        recommendedModel: "gemma4:e4b",
-        selectedModel: "gemma4:e4b",
-        models: []
-      }),
+      status: vi.fn().mockResolvedValue(readyStatus),
       startOllama: vi.fn(),
       pullModel: vi.fn(),
+      pullModelStream: vi.fn(),
       generateText: vi.fn()
     },
     history: {
@@ -31,21 +40,42 @@ beforeEach(() => {
 });
 
 describe("Nur shell", () => {
-  it("shows boot screen before entering the workspace", async () => {
+  it("boots into the main shell when Gemma is already ready", async () => {
     render(<App />);
 
+    // Boot screen shows the brand briefly
     expect(screen.getByRole("heading", { name: "Nur" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
+
+    // After the boot animation completes, the Chat heading appears
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Спросите Nur" })).toBeInTheDocument(), {
+      timeout: 3000
+    });
   });
 
-  it("enters workspace and opens section routes", async () => {
+  it("navigates between sections from the sidebar", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
-    await user.click(screen.getByRole("button", { name: "Открыть" }));
-    await user.click(screen.getByRole("button", { name: "Письма" }));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Спросите Nur" })).toBeInTheDocument(), {
+      timeout: 3000
+    });
 
+    await user.click(screen.getByRole("button", { name: "Письма" }));
     expect(screen.getByRole("heading", { name: "Напишите письмо за минуту" })).toBeInTheDocument();
+  });
+
+  it("shows the welcome wizard when no model is installed", async () => {
+    vi.mocked(window.os1.localAi.status).mockResolvedValue({
+      ...readyStatus,
+      ollamaInstalled: false,
+      ollamaRunning: false,
+      models: []
+    });
+    render(<App />);
+
+    await waitFor(
+      () => expect(screen.getByRole("heading", { name: "Сейчас всё подготовлю" })).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
   });
 });

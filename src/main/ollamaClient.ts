@@ -161,6 +161,64 @@ export class OllamaClient {
     return response.json() as Promise<PullResponse>;
   }
 
+  async pullModelStream(
+    model: GemmaModelId,
+    onProgress: (progress: { status: string; completed?: number; total?: number; digest?: string }) => void
+  ): Promise<void> {
+    let response: Response;
+    try {
+      response = await this.fetchImpl(`${this.baseUrl}/pull`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model, stream: true })
+      });
+    } catch {
+      throw new Error(`Ollama не запущен на ${this.serverUrl}.`);
+    }
+
+    if (!response.ok || !response.body) {
+      throw new Error(`Ollama pull failed: HTTP ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        try {
+          const chunk = JSON.parse(trimmed) as {
+            status?: string;
+            completed?: number;
+            total?: number;
+            digest?: string;
+            error?: string;
+          };
+          if (chunk.error) {
+            throw new Error(chunk.error);
+          }
+          onProgress({
+            status: chunk.status ?? "",
+            ...(chunk.completed !== undefined ? { completed: chunk.completed } : {}),
+            ...(chunk.total !== undefined ? { total: chunk.total } : {}),
+            ...(chunk.digest !== undefined ? { digest: chunk.digest } : {})
+          });
+        } catch (err) {
+          if (err instanceof Error && err.message && !err.message.startsWith("Unexpected")) {
+            throw err;
+          }
+        }
+      }
+    }
+  }
+
   async generateText(model: GemmaModelId, prompt: string): Promise<GenerateResponse> {
     let response: Response;
     try {

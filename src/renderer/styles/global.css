@@ -1544,3 +1544,249 @@ button {
   color: var(--os1-on-cream-muted);
   font-size: 14px;
 }
+
+/* ===== Welcome wizard ===== */
+
+.welcome {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  background:
+    linear-gradient(145deg, rgba(110, 214, 255, 0.88), rgba(141, 124, 255, 0.74) 52%, rgba(255, 141, 207, 0.74)),
+    #eef3ff;
+}
+
+.welcome__card {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  max-width: 540px;
+  padding: 40px 40px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 30px 80px rgba(45, 55, 98, 0.22);
+  backdrop-filter: blur(48px) saturate(180%);
+  animation: welcome-rise 500ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+.welcome__brand {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+}
+
+.welcome__brand h1 {
+  margin: 0;
+  color: var(--os1-on-coral-primary);
+  font-size: 42px;
+  font-weight: 200;
+  letter-spacing: 1px;
+}
+
+.welcome__tagline {
+  margin: 0;
+  color: var(--os1-on-cream-secondary);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.welcome__body {
+  display: grid;
+  gap: 14px;
+}
+
+.welcome__body--centered {
+  text-align: center;
+  justify-items: center;
+}
+
+.welcome__body h2 {
+  margin: 0;
+  color: var(--os1-on-cream-primary);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.welcome__body p {
+  margin: 0;
+  color: var(--os1-on-cream-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.welcome__steps-list {
+  margin: 8px 0 0;
+  padding-left: 22px;
+  color: var(--os1-on-cream-secondary);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.welcome__steps-list li::marker {
+  color: rgba(141, 124, 255, 0.85);
+}
+
+.welcome__primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(141, 124, 255, 0.92), rgba(110, 214, 255, 0.86)),
+    rgba(255, 255, 255, 0.24);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 18px 38px rgba(45, 55, 98, 0.24);
+  backdrop-filter: blur(24px) saturate(165%);
+  transition: transform var(--os1-motion-fast) ease, box-shadow var(--os1-motion-fast) ease;
+}
+
+.welcome__primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 22px 44px rgba(45, 55, 98, 0.28);
+}
+
+.welcome__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 999px;
+  color: var(--os1-on-cream-primary);
+  background: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(20px) saturate(160%);
+  transition: background var(--os1-motion-fast) ease;
+}
+
+.welcome__secondary:hover {
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.welcome__actions {
+  display: grid;
+  gap: 10px;
+  justify-items: stretch;
+}
+
+.welcome__spinner {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.32);
+  color: var(--os1-on-coral-primary);
+  animation: welcome-spin var(--os1-motion-slow) linear infinite;
+}
+
+.welcome__check {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  color: #2d8064;
+  background: rgba(119, 230, 196, 0.4);
+  animation: welcome-pop 460ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+.welcome__verify {
+  margin: 0;
+  padding: 12px 18px;
+  border-left: 3px solid rgba(141, 124, 255, 0.6);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.36);
+  color: var(--os1-on-cream-primary);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.welcome__progress {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.34);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+.welcome__progress-fill {
+  height: 100%;
+  background:
+    linear-gradient(135deg, rgba(141, 124, 255, 0.94), rgba(110, 214, 255, 0.92), rgba(119, 230, 196, 0.92));
+  transition: width 600ms ease-out;
+  box-shadow: 0 0 12px rgba(141, 124, 255, 0.5);
+}
+
+.welcome__progress-meta {
+  margin: 0;
+  color: var(--os1-on-cream-primary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.welcome__hint {
+  margin: 4px 0 0;
+  color: var(--os1-on-cream-muted);
+  font-size: 12px;
+}
+
+.welcome__error {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 200, 200, 0.36);
+  color: #5b1f1f;
+  font-size: 13px;
+}
+
+@keyframes welcome-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes welcome-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes welcome-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

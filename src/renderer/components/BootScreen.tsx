@@ -3,9 +3,10 @@ import { BrandLockup } from "./BrandLockup";
 
 interface BootScreenProps {
   onComplete(): void;
+  silent?: boolean;
 }
 
-export function BootScreen({ onComplete }: BootScreenProps): ReactElement {
+export function BootScreen({ onComplete, silent = false }: BootScreenProps): ReactElement {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -25,9 +26,11 @@ export function BootScreen({ onComplete }: BootScreenProps): ReactElement {
         </div>
         <h1>Nur</h1>
         <p>Локальный AI-помощник для офисных задач</p>
-        <button className="os1-button" type="button" disabled={!ready} onClick={onComplete}>
-          {ready ? "Открыть" : "Запуск"}
-        </button>
+        {silent ? null : (
+          <button className="os1-button" type="button" disabled={!ready} onClick={onComplete}>
+            {ready ? "Открыть" : "Запуск"}
+          </button>
+        )}
       </div>
     </main>
   );

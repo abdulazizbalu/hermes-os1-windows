@@ -4,6 +4,8 @@ export const ipcChannels = {
   localAiStatus: "localAi:status",
   localAiStartOllama: "localAi:startOllama",
   localAiPullModel: "localAi:pullModel",
+  localAiPullModelStream: "localAi:pullModelStream",
+  localAiPullModelProgress: "localAi:pullModelProgress",
   localAiGenerateText: "localAi:generateText",
   historyList: "history:list",
   historySave: "history:save",
@@ -64,6 +66,13 @@ export interface HistoryConversation {
   updatedAt: string;
 }
 
+export interface PullModelProgress {
+  status: string;
+  completed?: number;
+  total?: number;
+  digest?: string;
+}
+
 export interface NurApi {
   app: {
     info(): Promise<AppInfo>;
@@ -73,6 +82,10 @@ export interface NurApi {
     status(): Promise<LocalAiStatus>;
     startOllama(): Promise<LocalAiStatus>;
     pullModel(request: PullLocalModelRequest): Promise<LocalAiStatus>;
+    pullModelStream(
+      request: PullLocalModelRequest,
+      onProgress: (progress: PullModelProgress) => void
+    ): Promise<LocalAiStatus>;
     generateText(request: GenerateLocalTextRequest): Promise<GenerateLocalTextResponse>;
   };
   history: {

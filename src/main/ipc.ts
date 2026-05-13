@@ -52,6 +52,17 @@ export function registerIpcHandlers(): void {
     return client.status(request.model);
   });
 
+  ipcMain.handle(ipcChannels.localAiPullModelStream, async (event, payload: unknown) => {
+    const request = assertPullLocalModelRequest(payload);
+    const client = new OllamaClient();
+    await client.pullModelStream(request.model, (progress) => {
+      if (!event.sender.isDestroyed()) {
+        event.sender.send(ipcChannels.localAiPullModelProgress, progress);
+      }
+    });
+    return client.status(request.model);
+  });
+
   ipcMain.handle(ipcChannels.localAiGenerateText, async (_event, payload: unknown) => {
     const request = assertGenerateLocalTextRequest(payload);
     return new OllamaClient().generateText(request.model, request.prompt);
