@@ -13,12 +13,13 @@ The first slice provides:
 - OS1 boot screen
 - Sidebar and all OS1 section routes
 - Typed secure IPC skeleton
+- Orgo API key verification and secure credential storage
+- Workspace and computer picker
+- Orgo computer creation
 - Windows installer workflow
 
 Upcoming slices add:
 
-- Orgo API key verification and secure credential storage
-- Workspace and computer picker
 - Hermes Agent install on Orgo VM
 - WebSocket terminal
 - Overview, Sessions, Kanban, Files, Skills, Cron, Usage
