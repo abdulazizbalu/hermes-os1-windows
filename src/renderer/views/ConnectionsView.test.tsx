@@ -14,7 +14,7 @@ beforeEach(() => {
       saveDraft: vi.fn(),
       saveLocal: vi.fn().mockResolvedValue({
         id: "connection-1",
-        label: "Локальная Gemma",
+        label: "Luma Local",
         transport: "local",
         destination: "WINDOWS / gemma4:e4b",
         model: "gemma4:e4b",
@@ -59,7 +59,7 @@ describe("ConnectionsView", () => {
     render(<ConnectionsView />);
 
     await user.click(await screen.findByRole("button", { name: "Проверить Ollama" }));
-    await user.click(screen.getByRole("button", { name: "Подготовить Gemma 4 E4B" }));
+    await user.click(screen.getByRole("button", { name: "Подготовить E4B" }));
     await user.click(screen.getByRole("button", { name: "Проверить русский" }));
 
     await waitFor(() => expect(window.os1.localAi.pullModel).toHaveBeenCalledWith({ model: "gemma4:e4b" }));
@@ -79,11 +79,11 @@ describe("ConnectionsView", () => {
 
     await user.clear(screen.getByLabelText("Папка workspace"));
     await user.type(screen.getByLabelText("Папка workspace"), "C:\\Users\\User");
-    await user.click(await screen.findByRole("button", { name: "Сохранить локальный workspace" }));
+    await user.click(await screen.findByRole("button", { name: "Сохранить workspace" }));
 
     await waitFor(() =>
       expect(window.os1.connections.saveLocal).toHaveBeenCalledWith({
-        label: "Локальная Gemma",
+        label: "Luma Local",
         runtime: "windows",
         model: "gemma4:e4b",
         workspacePath: "C:\\Users\\User"

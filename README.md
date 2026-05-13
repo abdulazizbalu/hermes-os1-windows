@@ -1,17 +1,16 @@
-# Hermes OS1 Windows
+# Luma Desktop
 
-Windows desktop port of Hermes Desktop - OS1 Edition.
+Local AI workspace for Windows powered by Gemma.
 
-This project preserves the OS1 product shape, visual design, and host-first workflows while replacing macOS-only implementation details with Windows-compatible equivalents.
+Luma Desktop keeps a calm desktop workspace shape, but is branded and tuned for a Windows-first local AI experience.
 
 ## Current Status
 
 The first slice provides:
 
 - Electron + React + TypeScript desktop shell
-- OS1 coral/cream design tokens
-- OS1 boot screen
-- Sidebar and all OS1 section routes
+- Luma glass/coral design tokens
+- Luma boot screen, sidebar, and section routes
 - Typed secure IPC skeleton
 - Local Gemma/Ollama provider with no API key requirement
 - Gemma 4 E4B first-run flow with automatic Ollama preparation and Russian response check
@@ -21,7 +20,7 @@ The first slice provides:
 
 Upcoming slices add:
 
-- Hermes Agent install for Local Windows/WSL
+- Luma Agent install for Local Windows/WSL
 - WebSocket terminal
 - Overview, Sessions, Kanban, Files, Skills, Cron, Usage
 - Providers, Voice, Desktop/VNC, Mail, Messaging, Doctor
@@ -47,7 +46,7 @@ npm run build
 npm run build:win
 ```
 
-The installer is written to `release/`.
+The installer is written to `release/` as `Luma-Desktop-...exe`.
 
 ## Windows SmartScreen
 

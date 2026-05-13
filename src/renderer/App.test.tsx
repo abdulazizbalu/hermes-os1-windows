@@ -32,20 +32,20 @@ beforeEach(() => {
   };
 });
 
-describe("OS1 shell", () => {
+describe("Luma shell", () => {
   it("shows boot screen before entering the workspace", async () => {
     render(<App />);
 
-    expect(screen.getByText("OS1")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Начать" })).toBeEnabled(), { timeout: 2000 });
+    expect(screen.getByRole("heading", { name: "Luma" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
   });
 
   it("enters workspace and opens section routes", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Начать" })).toBeEnabled(), { timeout: 2000 });
-    await user.click(screen.getByRole("button", { name: "Начать" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
+    await user.click(screen.getByRole("button", { name: "Открыть" }));
     await user.click(screen.getByRole("button", { name: "Терминал" }));
 
     expect(screen.getByRole("heading", { name: "Терминал" })).toBeInTheDocument();

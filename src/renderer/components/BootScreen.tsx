@@ -17,11 +17,16 @@ export function BootScreen({ onComplete }: BootScreenProps): ReactElement {
     <main className="boot-screen">
       <BrandLockup />
       <div className="boot-screen__center">
-        <div className="boot-screen__ring" aria-hidden="true" />
-        <h1>OS1</h1>
-        <p>Рабочее пространство Hermes для Windows</p>
+        <div className="boot-screen__ring" aria-hidden="true">
+          <div className="brand-mark brand-mark--large">
+            <span />
+            <span />
+          </div>
+        </div>
+        <h1>Luma</h1>
+        <p>Локальное рабочее пространство с Gemma 4 для Windows</p>
         <button className="os1-button" type="button" disabled={!ready} onClick={onComplete}>
-          {ready ? "Начать" : "Запуск"}
+          {ready ? "Открыть" : "Запуск"}
         </button>
       </div>
     </main>

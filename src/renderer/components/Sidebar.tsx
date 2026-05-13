@@ -52,11 +52,11 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
       <div className="sidebar__scroll os1-scroll">
         <BrandLockup />
         <section className="sidebar-card">
-          <h2>Нет активного хоста</h2>
-          <p>Подключите Local Gemma или SSH-хост.</p>
-          <StatusPill tone="muted">ОФЛАЙН</StatusPill>
+          <h2>Локальный AI</h2>
+          <p>Gemma E4B работает на вашем Windows-компьютере.</p>
+          <StatusPill tone="success">ЛОКАЛЬНО</StatusPill>
         </section>
-        <nav className="sidebar__nav" aria-label="OS1 sections">
+        <nav className="sidebar__nav" aria-label="Luma sections">
           {os1Sections.map((section) => {
             const Icon = icons[section.icon];
             const selected = activeSection === section.id;

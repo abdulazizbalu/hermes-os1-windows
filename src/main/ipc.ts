@@ -73,7 +73,15 @@ export function registerIpcHandlers(): void {
       createdAt: new Date().toISOString()
     };
 
-    const next = [connection, ...connections];
+    const next = [
+      connection,
+      ...connections.filter(
+        (item) =>
+          item.runtime !== connection.runtime ||
+          item.model !== connection.model ||
+          item.workspacePath !== connection.workspacePath
+      )
+    ];
     await writeConnections(next);
     return connection;
   });

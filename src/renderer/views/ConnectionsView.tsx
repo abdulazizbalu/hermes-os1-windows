@@ -10,8 +10,8 @@ const modelLabels: Record<GemmaModelId, string> = {
 };
 
 const modelDescriptions: Record<GemmaModelId, string> = {
-  "gemma4:e2b": "Легкая резервная модель",
-  "gemma4:e4b": "Встроенный выбор OS1",
+  "gemma4:e2b": "Легкий резервный вариант",
+  "gemma4:e4b": "Основной выбор Luma",
   "gemma4:26b": "Мощная рабочая станция"
 };
 
@@ -20,7 +20,7 @@ export function ConnectionsView(): ReactElement {
   const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
   const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e4b");
   const [runtime, setRuntime] = useState<LocalRuntime>("windows");
-  const [label, setLabel] = useState("Локальная Gemma");
+  const [label, setLabel] = useState("Luma Local");
   const [workspacePath, setWorkspacePath] = useState("C:\\Users\\User");
   const [status, setStatus] = useState("Готово.");
   const [russianCheck, setRussianCheck] = useState("");
@@ -89,7 +89,15 @@ export function ConnectionsView(): ReactElement {
       model: selectedModel,
       workspacePath
     });
-    setConnections((current) => [saved, ...current]);
+    setConnections((current) => [
+      saved,
+      ...current.filter(
+        (connection) =>
+          connection.runtime !== saved.runtime ||
+          connection.model !== saved.model ||
+          connection.workspacePath !== saved.workspacePath
+      )
+    ]);
     setStatus(`Сохранено: ${saved.label}.`);
   }
 
@@ -97,15 +105,38 @@ export function ConnectionsView(): ReactElement {
     return localAiStatus ? isModelInstalledInStatus(localAiStatus, model) : false;
   }
 
+  const selectedModelReady = isModelInstalled(selectedModel);
+  const ollamaRunning = Boolean(localAiStatus?.ollamaRunning);
+  const readinessTone: "muted" | "warning" | "success" = selectedModelReady ? "success" : ollamaRunning ? "warning" : "muted";
+  const readinessLabel = selectedModelReady ? "GEMMA ГОТОВА" : ollamaRunning ? "НУЖНА ПОДГОТОВКА" : "OLLAMA ВЫКЛ";
+  const readinessTitle = selectedModelReady
+    ? "Luma готова отвечать на русском"
+    : ollamaRunning
+      ? "Подготовим Gemma 4 E4B"
+      : "Запустите Ollama, дальше Luma все подхватит";
+  const readinessDescription = selectedModelReady
+    ? "Модель уже доступна локально. Можно сохранить рабочую папку и переходить к задачам."
+    : ollamaRunning
+      ? "Ollama найден. Нажмите одну кнопку, чтобы подготовить E4B для локальной работы без ключей."
+      : "Luma работает бесплатно через локальную Gemma. Когда Ollama запущен, приложение подготовит E4B автоматически.";
+
   return (
     <SectionFrame
-      eyebrow="Подключения"
-      title="Локальная Gemma 4"
-      description="OS1 работает бесплатно на локальной Gemma 4 через Ollama, без ключей и без облачного провайдера."
+      eyebrow="Luma Desktop"
+      title="Локальная Gemma 4 E4B"
+      description="Luma работает бесплатно на локальной Gemma 4 через Ollama, без ключей и без облачного провайдера. Русский язык включен в системный промпт."
     >
       <div className="connections-grid">
         <div className="local-ai-grid">
-          <section className="panel-form">
+          <section className="panel-form assistant-setup">
+            <div className="assistant-setup__header">
+              <div className="assistant-setup__icon" aria-hidden="true">E4B</div>
+              <div>
+                <StatusPill tone={readinessTone}>{readinessLabel}</StatusPill>
+                <h2>{readinessTitle}</h2>
+                <p>{readinessDescription}</p>
+              </div>
+            </div>
             <div className="local-ai-status">
               <StatusPill tone={localAiStatus?.ollamaRunning ? "success" : "warning"}>
                 {localAiStatus?.ollamaRunning ? "OLLAMA ГОТОВ" : "OLLAMA ВЫКЛ"}
@@ -117,7 +148,7 @@ export function ConnectionsView(): ReactElement {
                 Проверить Ollama
               </button>
               <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy}>
-                Подготовить Gemma 4 E4B
+                Подготовить E4B
               </button>
               <button className="os1-button" type="button" onClick={checkRussian} disabled={isBusy}>
                 Проверить русский
@@ -138,13 +169,17 @@ export function ConnectionsView(): ReactElement {
                 <span>{modelLabels[model]}</span>
                 <small>{modelDescriptions[model]}</small>
                 <StatusPill tone={isModelInstalled(model) ? "success" : "muted"}>
-                  {isModelInstalled(model) ? "ГОТОВА" : "В ПАКЕТЕ"}
+                  {isModelInstalled(model) ? "ГОТОВА" : "ПОДГОТОВИТЬ"}
                 </StatusPill>
               </button>
             ))}
           </div>
 
-          <form className="panel-form" onSubmit={saveConnection}>
+          <form className="panel-form workspace-card" onSubmit={saveConnection}>
+            <div className="workspace-card__header">
+              <h2>Рабочая папка</h2>
+              <p>Сохраните место, где Luma будет работать с файлами проекта.</p>
+            </div>
             <label htmlFor="local-connection-label">
               <span>Название подключения</span>
               <input id="local-connection-label" value={label} onChange={(event) => setLabel(event.target.value)} />
@@ -170,15 +205,19 @@ export function ConnectionsView(): ReactElement {
               />
             </label>
             <button className="os1-button" type="submit">
-              Сохранить локальный workspace
+              Сохранить workspace
             </button>
           </form>
         </div>
 
         <div className="connection-list">
-          <StatusPill tone={connections.length > 0 ? "success" : "muted"}>
-            {connections.length > 0 ? "ПОДКЛЮЧЕНИЯ" : "НЕТ ХОСТОВ"}
-          </StatusPill>
+          <div className="connection-list__header">
+            <StatusPill tone={connections.length > 0 ? "success" : "muted"}>
+              {connections.length > 0 ? "ГОТОВО" : "ПУСТО"}
+            </StatusPill>
+            <h2>Рабочие пространства</h2>
+          </div>
+          {connections.length === 0 ? <p className="connection-list__empty">Здесь появится сохраненная локальная Gemma.</p> : null}
           {connections.map((connection) => (
             <article key={connection.id} className="connection-card">
               <h2>{connection.label}</h2>

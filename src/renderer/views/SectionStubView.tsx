@@ -11,7 +11,7 @@ export function SectionStubView({ eyebrow, title, description }: SectionStubView
   return (
     <SectionFrame eyebrow={eyebrow} title={title} description={description}>
       <div className="empty-panel">
-        <p>Windows parity surface is reserved for this OS1 section.</p>
+        <p>Этот раздел Luma зарезервирован для следующего Windows-слоя.</p>
       </div>
     </SectionFrame>
   );

@@ -1,18 +1,24 @@
 import { app, BrowserWindow, shell } from "electron";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { registerIpcHandlers } from "./ipc.js";
 
 const isDevelopment = !app.isPackaged;
 
 function createMainWindow(): BrowserWindow {
+  const iconPath = isDevelopment
+    ? join(process.cwd(), "buildResources", "icon.png")
+    : join(process.resourcesPath, "icon.png");
+
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
     minWidth: 1040,
     minHeight: 680,
     show: false,
-    title: "Hermes OS1 Windows",
+    title: "Luma Desktop",
     backgroundColor: "#C65A43",
+    icon: existsSync(iconPath) ? iconPath : undefined,
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
       contextIsolation: true,

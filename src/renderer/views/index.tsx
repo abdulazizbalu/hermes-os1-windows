@@ -32,7 +32,7 @@ export function getSectionView(section: OS1SectionId): ComponentType {
       <SectionStubView
         eyebrow={titles[section]}
         title={titles[section]}
-        description={`${titles[section]} сохранит OS1 workflow вокруг локального хоста, когда будет реализован этот слой.`}
+        description={`${titles[section]} сохранит стиль Luma вокруг локальной Gemma, когда будет реализован этот слой.`}
       />
     );
   };

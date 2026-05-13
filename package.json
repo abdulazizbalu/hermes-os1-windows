@@ -1,7 +1,7 @@
 {
-  "name": "hermes-os1-windows",
+  "name": "luma-desktop",
   "version": "0.1.0",
-  "description": "Windows desktop port of Hermes Desktop - OS1 Edition.",
+  "description": "Local AI workspace for Windows powered by Gemma.",
   "author": "Abdulaziz",
   "license": "MIT",
   "private": false,
@@ -45,16 +45,24 @@
     "vitest": "^4.1.6"
   },
   "build": {
-    "appId": "com.abdulazizbalu.hermesos1windows",
-    "productName": "Hermes OS1 Windows",
+    "appId": "com.abdulazizbalu.lumadesktop",
+    "productName": "Luma Desktop",
     "directories": {
+      "buildResources": "buildResources",
       "output": "release"
     },
     "files": [
       "out/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "buildResources/icon.png",
+        "to": "icon.png"
+      }
+    ],
     "win": {
+      "icon": "buildResources/icon.ico",
       "signAndEditExecutable": false,
       "target": [
         {
@@ -64,14 +72,14 @@
           ]
         }
       ],
-      "artifactName": "Hermes-OS1-Windows-${version}-${arch}.${ext}"
+      "artifactName": "Luma-Desktop-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Hermes OS1 Windows"
+      "shortcutName": "Luma Desktop"
     }
   }
 }
