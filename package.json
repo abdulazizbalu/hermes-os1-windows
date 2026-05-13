@@ -1,7 +1,7 @@
 {
-  "name": "luma-desktop",
+  "name": "nur",
   "version": "0.1.0",
-  "description": "Local AI workspace for Windows powered by Gemma.",
+  "description": "Nur — локальный AI-помощник для офисных задач, на базе Gemma.",
   "author": "Abdulaziz",
   "license": "MIT",
   "private": false,
@@ -45,8 +45,8 @@
     "vitest": "^4.1.6"
   },
   "build": {
-    "appId": "com.abdulazizbalu.lumadesktop",
-    "productName": "Luma Desktop",
+    "appId": "ai.nur.desktop",
+    "productName": "Nur",
     "directories": {
       "buildResources": "buildResources",
       "output": "release"
@@ -72,14 +72,14 @@
           ]
         }
       ],
-      "artifactName": "Luma-Desktop-${version}-${arch}.${ext}"
+      "artifactName": "Nur-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Luma Desktop"
+      "shortcutName": "Nur"
     }
   }
 }

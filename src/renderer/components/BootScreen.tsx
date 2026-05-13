@@ -23,8 +23,8 @@ export function BootScreen({ onComplete }: BootScreenProps): ReactElement {
             <span />
           </div>
         </div>
-        <h1>Luma</h1>
-        <p>Локальное рабочее пространство с Gemma 4 для Windows</p>
+        <h1>Nur</h1>
+        <p>Локальный AI-помощник для офисных задач</p>
         <button className="os1-button" type="button" disabled={!ready} onClick={onComplete}>
           {ready ? "Открыть" : "Запуск"}
         </button>

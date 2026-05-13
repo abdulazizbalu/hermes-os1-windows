@@ -1,5 +1,5 @@
-import { FormEvent, ReactElement, useEffect, useState } from "react";
-import { ConnectionSummary, GemmaModelId, LocalAiStatus, LocalRuntime, gemmaModelIds } from "../../shared/ipc";
+import { ReactElement, useEffect, useState } from "react";
+import { GemmaModelId, LocalAiStatus, gemmaModelIds } from "../../shared/ipc";
 import { SectionFrame } from "../components/SectionFrame";
 import { StatusPill } from "../components/StatusPill";
 
@@ -10,24 +10,19 @@ const modelLabels: Record<GemmaModelId, string> = {
 };
 
 const modelDescriptions: Record<GemmaModelId, string> = {
-  "gemma4:e2b": "Легкий резервный вариант",
-  "gemma4:e4b": "Основной выбор Luma",
-  "gemma4:26b": "Мощная рабочая станция"
+  "gemma4:e2b": "Лёгкая, для слабого железа",
+  "gemma4:e4b": "Рекомендуем для Nur",
+  "gemma4:26b": "Максимальное качество"
 };
 
-export function ConnectionsView(): ReactElement {
-  const [connections, setConnections] = useState<ConnectionSummary[]>([]);
+export function SettingsView(): ReactElement {
   const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
   const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e4b");
-  const [runtime, setRuntime] = useState<LocalRuntime>("windows");
-  const [label, setLabel] = useState("Luma Local");
-  const [workspacePath, setWorkspacePath] = useState("C:\\Users\\User");
   const [status, setStatus] = useState("Готово.");
   const [russianCheck, setRussianCheck] = useState("");
   const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
-    void window.os1.connections.list().then(setConnections);
     void detectOllama(true);
   }, []);
 
@@ -50,6 +45,25 @@ export function ConnectionsView(): ReactElement {
     } finally {
       setIsBusy(false);
     }
+  }
+
+  async function startOllama(): Promise<void> {
+    setIsBusy(true);
+    setStatus("Запускаю Ollama...");
+    try {
+      const nextStatus = await window.os1.localAi.startOllama();
+      setLocalAiStatus(nextStatus);
+      setSelectedModel(nextStatus.selectedModel);
+      setStatus(nextStatus.ollamaRunning ? "Ollama запущен. Можно подготовить Gemma." : nextStatus.error ?? "Ollama пока не отвечает.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Не удалось запустить Ollama.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  function downloadOllama(): void {
+    window.open("https://ollama.com/download/windows", "_blank", "noopener,noreferrer");
   }
 
   async function pullModel(): Promise<void> {
@@ -81,56 +95,47 @@ export function ConnectionsView(): ReactElement {
     }
   }
 
-  async function saveConnection(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    const saved = await window.os1.connections.saveLocal({
-      label,
-      runtime,
-      model: selectedModel,
-      workspacePath
-    });
-    setConnections((current) => [
-      saved,
-      ...current.filter(
-        (connection) =>
-          connection.runtime !== saved.runtime ||
-          connection.model !== saved.model ||
-          connection.workspacePath !== saved.workspacePath
-      )
-    ]);
-    setStatus(`Сохранено: ${saved.label}.`);
-  }
-
   function isModelInstalled(model: GemmaModelId): boolean {
     return localAiStatus ? isModelInstalledInStatus(localAiStatus, model) : false;
   }
 
   const selectedModelReady = isModelInstalled(selectedModel);
   const ollamaRunning = Boolean(localAiStatus?.ollamaRunning);
+  const ollamaInstalled = Boolean(localAiStatus?.ollamaInstalled);
   const readinessTone: "muted" | "warning" | "success" = selectedModelReady ? "success" : ollamaRunning ? "warning" : "muted";
-  const readinessLabel = selectedModelReady ? "GEMMA ГОТОВА" : ollamaRunning ? "НУЖНА ПОДГОТОВКА" : "OLLAMA ВЫКЛ";
+  const readinessLabel = selectedModelReady
+    ? "GEMMA ГОТОВА"
+    : ollamaRunning
+      ? "НУЖНА ПОДГОТОВКА"
+      : ollamaInstalled
+        ? "OLLAMA ОСТАНОВЛЕН"
+        : "НУЖЕН OLLAMA";
   const readinessTitle = selectedModelReady
-    ? "Luma готова отвечать на русском"
+    ? "Nur готов к работе"
     : ollamaRunning
-      ? "Подготовим Gemma 4 E4B"
-      : "Запустите Ollama, дальше Luma все подхватит";
+      ? "Подготовим Gemma 4"
+      : ollamaInstalled
+        ? "Запустите Ollama прямо отсюда"
+        : "Установите Ollama, дальше Nur всё подхватит";
   const readinessDescription = selectedModelReady
-    ? "Модель уже доступна локально. Можно сохранить рабочую папку и переходить к задачам."
+    ? "Модель доступна локально. Можно переходить к задачам."
     : ollamaRunning
-      ? "Ollama найден. Нажмите одну кнопку, чтобы подготовить E4B для локальной работы без ключей."
-      : "Luma работает бесплатно через локальную Gemma. Когда Ollama запущен, приложение подготовит E4B автоматически.";
+      ? "Ollama найден. Нажмите одну кнопку, чтобы подготовить Gemma 4 для локальной работы без ключей."
+      : ollamaInstalled
+        ? "Nur попробует поднять локальный сервер Ollama и затем подготовит Gemma 4."
+        : "Ollama нужен один раз как локальный движок. После установки Nur подготовит Gemma 4 без API-ключей.";
 
   return (
     <SectionFrame
-      eyebrow="Luma Desktop"
-      title="Локальная Gemma 4 E4B"
-      description="Luma работает бесплатно на локальной Gemma 4 через Ollama, без ключей и без облачного провайдера. Русский язык включен в системный промпт."
+      eyebrow="Настройки"
+      title="Локальная Gemma 4"
+      description="Nur работает бесплатно на локальной Gemma 4 через Ollama, без ключей и без облака. Русский язык включён в системный промпт."
     >
       <div className="connections-grid">
         <div className="local-ai-grid">
           <section className="panel-form assistant-setup">
             <div className="assistant-setup__header">
-              <div className="assistant-setup__icon" aria-hidden="true">E4B</div>
+              <div className="assistant-setup__icon" aria-hidden="true">Nur</div>
               <div>
                 <StatusPill tone={readinessTone}>{readinessLabel}</StatusPill>
                 <h2>{readinessTitle}</h2>
@@ -144,13 +149,23 @@ export function ConnectionsView(): ReactElement {
               {localAiStatus?.version ? <span>Ollama {localAiStatus.version}</span> : <span>Ollama не найден</span>}
             </div>
             <div className="local-actions">
+              {!ollamaInstalled ? (
+                <button className="os1-button os1-button--primary" type="button" onClick={downloadOllama} disabled={isBusy}>
+                  Скачать Ollama
+                </button>
+              ) : null}
+              {ollamaInstalled && !ollamaRunning ? (
+                <button className="os1-button os1-button--primary" type="button" onClick={startOllama} disabled={isBusy}>
+                  Запустить Ollama
+                </button>
+              ) : null}
               <button className="os1-button" type="button" onClick={() => void detectOllama()} disabled={isBusy}>
                 Проверить Ollama
               </button>
-              <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy}>
-                Подготовить E4B
+              <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy || !ollamaRunning}>
+                Подготовить Gemma
               </button>
-              <button className="os1-button" type="button" onClick={checkRussian} disabled={isBusy}>
+              <button className="os1-button" type="button" onClick={checkRussian} disabled={isBusy || !selectedModelReady}>
                 Проверить русский
               </button>
             </div>
@@ -174,57 +189,6 @@ export function ConnectionsView(): ReactElement {
               </button>
             ))}
           </div>
-
-          <form className="panel-form workspace-card" onSubmit={saveConnection}>
-            <div className="workspace-card__header">
-              <h2>Рабочая папка</h2>
-              <p>Сохраните место, где Luma будет работать с файлами проекта.</p>
-            </div>
-            <label htmlFor="local-connection-label">
-              <span>Название подключения</span>
-              <input id="local-connection-label" value={label} onChange={(event) => setLabel(event.target.value)} />
-            </label>
-            <label htmlFor="local-runtime">
-              <span>Среда</span>
-              <select
-                id="local-runtime"
-                value={runtime}
-                onChange={(event) => setRuntime(event.target.value as LocalRuntime)}
-              >
-                <option value="windows">Windows</option>
-                <option value="wsl">WSL</option>
-              </select>
-            </label>
-            <label htmlFor="local-workspace-path">
-              <span>Папка workspace</span>
-              <input
-                id="local-workspace-path"
-                aria-label="Папка workspace"
-                value={workspacePath}
-                onChange={(event) => setWorkspacePath(event.target.value)}
-              />
-            </label>
-            <button className="os1-button" type="submit">
-              Сохранить workspace
-            </button>
-          </form>
-        </div>
-
-        <div className="connection-list">
-          <div className="connection-list__header">
-            <StatusPill tone={connections.length > 0 ? "success" : "muted"}>
-              {connections.length > 0 ? "ГОТОВО" : "ПУСТО"}
-            </StatusPill>
-            <h2>Рабочие пространства</h2>
-          </div>
-          {connections.length === 0 ? <p className="connection-list__empty">Здесь появится сохраненная локальная Gemma.</p> : null}
-          {connections.map((connection) => (
-            <article key={connection.id} className="connection-card">
-              <h2>{connection.label}</h2>
-              <p>{connection.destination}</p>
-              <span>{connection.model ?? connection.transport}</span>
-            </article>
-          ))}
         </div>
       </div>
     </SectionFrame>

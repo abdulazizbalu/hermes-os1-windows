@@ -1,38 +1,31 @@
-# Luma Desktop
+# Nur
 
-Local AI workspace for Windows powered by Gemma.
+**Nur** — локальный AI-помощник для офисных задач на Windows. Работает на Gemma 4 через Ollama, без API-ключей и без облака.
 
-Luma Desktop keeps a calm desktop workspace shape, but is branded and tuned for a Windows-first local AI experience.
+## Что умеет
 
-## Current Status
+- **Чат** — свободный диалог с моделью
+- **Письма** — черновики писем по теме, тону и получателю
+- **Суммировать** — краткое содержание длинных текстов
+- **Перевести** — между русским, узбекским и английским
+- **Улучшить** — грамматика, стиль, переформулировка
+- **История** — все прошлые разговоры
+- **Настройки** — управление моделью и языком
 
-The first slice provides:
+## Стек
 
-- Electron + React + TypeScript desktop shell
-- Luma glass/coral design tokens
-- Luma boot screen, sidebar, and section routes
-- Typed secure IPC skeleton
-- Local Gemma/Ollama provider with no API key requirement
-- Gemma 4 E4B first-run flow with automatic Ollama preparation and Russian response check
-- Russian UI for the boot, sidebar, sections, and Local Gemma setup
-- Local Windows/WSL workspace connection flow
-- Windows installer workflow
+- Electron 39 + React 19 + TypeScript 5.9
+- Ollama (локальный движок) + Gemma 4 (E2B / E4B / 26B)
+- Vite, Vitest, electron-builder NSIS
 
-Upcoming slices add:
-
-- Luma Agent install for Local Windows/WSL
-- WebSocket terminal
-- Overview, Sessions, Kanban, Files, Skills, Cron, Usage
-- Providers, Voice, Desktop/VNC, Mail, Messaging, Doctor
-
-## Development
+## Разработка
 
 ```sh
 npm install
 npm run dev
 ```
 
-## Checks
+## Проверки
 
 ```sh
 npm run typecheck
@@ -40,20 +33,14 @@ npm run test
 npm run build
 ```
 
-## Build Windows Installer
+## Сборка Windows-установщика
 
 ```sh
 npm run build:win
 ```
 
-The installer is written to `release/` as `Luma-Desktop-...exe`.
+Установщик появится в `release/` как `Nur-<version>-x64.exe`.
 
 ## Windows SmartScreen
 
-Early builds are unsigned. Windows SmartScreen may show a warning on first launch. Use only installers from this repository's GitHub Releases.
-
-## Design Reference
-
-Reference product: `nickvasilescu/hermes-desktop-os1`.
-
-Parity spec: `docs/superpowers/specs/2026-05-12-os1-windows-parity-design.md`.
+Ранние сборки не подписаны. Windows SmartScreen может показать предупреждение при первом запуске. Используйте только установщики из GitHub Releases этого репозитория.

@@ -9,15 +9,6 @@ beforeEach(() => {
       info: vi.fn(),
       diagnostics: vi.fn()
     },
-    connections: {
-      list: vi.fn().mockResolvedValue([]),
-      saveDraft: vi.fn().mockImplementation(async (draft) => ({
-        ...draft,
-        id: "connection-1",
-        createdAt: "2026-05-12T00:00:00.000Z"
-      })),
-      saveLocal: vi.fn()
-    },
     localAi: {
       status: vi.fn().mockResolvedValue({
         ollamaInstalled: false,
@@ -26,17 +17,18 @@ beforeEach(() => {
         selectedModel: "gemma4:e4b",
         models: []
       }),
+      startOllama: vi.fn(),
       pullModel: vi.fn(),
       generateText: vi.fn()
     }
   };
 });
 
-describe("Luma shell", () => {
+describe("Nur shell", () => {
   it("shows boot screen before entering the workspace", async () => {
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "Luma" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Nur" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
   });
 
@@ -46,8 +38,8 @@ describe("Luma shell", () => {
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Открыть" })).toBeEnabled(), { timeout: 2000 });
     await user.click(screen.getByRole("button", { name: "Открыть" }));
-    await user.click(screen.getByRole("button", { name: "Терминал" }));
+    await user.click(screen.getByRole("button", { name: "Письма" }));
 
-    expect(screen.getByRole("heading", { name: "Терминал" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Письма" })).toBeInTheDocument();
   });
 });

@@ -1,18 +1,18 @@
 import { app } from "electron";
 import { join } from "node:path";
 
-export interface OS1AppPaths {
+export interface NurAppPaths {
   appData: string;
   logs: string;
-  connections: string;
 }
 
-export function getOS1AppPaths(): OS1AppPaths {
+export function getNurAppPaths(): NurAppPaths {
   const appData = app.getPath("userData");
 
   return {
     appData,
-    logs: join(appData, "logs"),
-    connections: join(appData, "connections.json")
+    logs: join(appData, "logs")
   };
 }
+
+export const getOS1AppPaths = getNurAppPaths;

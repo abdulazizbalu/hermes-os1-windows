@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, Menu, shell } from "electron";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { registerIpcHandlers } from "./ipc.js";
@@ -16,8 +16,9 @@ function createMainWindow(): BrowserWindow {
     minWidth: 1040,
     minHeight: 680,
     show: false,
-    title: "Luma Desktop",
+    title: "Nur",
     backgroundColor: "#C65A43",
+    autoHideMenuBar: true,
     icon: existsSync(iconPath) ? iconPath : undefined,
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
@@ -28,6 +29,7 @@ function createMainWindow(): BrowserWindow {
   });
 
   mainWindow.on("ready-to-show", () => {
+    mainWindow.setMenuBarVisibility(false);
     mainWindow.show();
   });
 
@@ -46,6 +48,7 @@ function createMainWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   registerIpcHandlers();
   createMainWindow();
 

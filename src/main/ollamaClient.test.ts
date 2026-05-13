@@ -41,7 +41,7 @@ describe("OllamaClient", () => {
       ollamaRunning: false,
       recommendedModel: "gemma4:e4b",
       selectedModel: "gemma4:e2b",
-      error: "Ollama is not running on http://127.0.0.1:11434.",
+      error: "Ollama не запущен на http://127.0.0.1:11434.",
       models: [
         { name: "gemma4:e2b", installed: false },
         { name: "gemma4:e4b", installed: false },
@@ -69,6 +69,31 @@ describe("OllamaClient", () => {
     );
   });
 
+  it("starts Ollama serve and returns the refreshed local status", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        models: [{ name: "gemma4:e4b", size: 9600000000 }]
+      })
+    });
+    const runCommand = vi.fn().mockResolvedValue({ stdout: "ollama version is 0.12.0", stderr: "" });
+    const startCommand = vi.fn().mockResolvedValue(undefined);
+    const client = new OllamaClient({
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      runCommand,
+      startCommand,
+      waitForServerMs: 1
+    });
+
+    await expect(client.startServer()).resolves.toMatchObject({
+      ollamaInstalled: true,
+      ollamaRunning: true,
+      selectedModel: "gemma4:e4b"
+    });
+    expect(startCommand).toHaveBeenCalledWith("ollama", ["serve"]);
+  });
+
   it("generates Russian text with a Russian system prompt", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
@@ -88,7 +113,7 @@ describe("OllamaClient", () => {
         body: JSON.stringify({
           model: "gemma4:e2b",
           prompt: "Проверь русский язык.",
-          system: "Отвечай только на русском языке. Пиши ясно, дружелюбно и кратко.",
+          system: "Ты — Nur, локальный AI-помощник для офисных задач. Отвечай по-русски ясно, дружелюбно и кратко.",
           stream: false
         })
       })
@@ -100,7 +125,7 @@ describe("OllamaClient", () => {
     const client = new OllamaClient({ fetchImpl: fetchImpl as unknown as typeof fetch, runCommand: vi.fn() });
 
     await expect(client.pullModel("gemma4:e4b")).rejects.toThrow(
-      "Ollama is not running on http://127.0.0.1:11434."
+      "Ollama не запущен на http://127.0.0.1:11434."
     );
   });
 });

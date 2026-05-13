@@ -1,49 +1,22 @@
-import {
-  BookOpen,
-  Cable,
-  ChartNoAxesColumn,
-  Clock3,
-  Columns3,
-  Files,
-  KeyRound,
-  LayoutDashboard,
-  Mail,
-  MessageCircle,
-  MessagesSquare,
-  MicOff,
-  Monitor,
-  Plug,
-  Sparkles,
-  Stethoscope,
-  Terminal
-} from "lucide-react";
+import { AlignLeft, Clock3, Languages, Mail, MessageCircle, MicOff, Settings, Wand2 } from "lucide-react";
 import { ReactElement } from "react";
-import { os1Sections, OS1SectionId } from "../../shared/sections";
+import { nurSections, NurSectionId } from "../../shared/sections";
 import { BrandLockup } from "./BrandLockup";
 import { StatusPill } from "./StatusPill";
 
 const icons = {
-  BookOpen,
-  Cable,
-  ChartNoAxesColumn,
+  AlignLeft,
   Clock3,
-  Columns3,
-  Files,
-  KeyRound,
-  LayoutDashboard,
+  Languages,
   Mail,
   MessageCircle,
-  MessagesSquare,
-  Monitor,
-  Plug,
-  Sparkles,
-  Stethoscope,
-  Terminal
+  Settings,
+  Wand2
 };
 
 interface SidebarProps {
-  activeSection: OS1SectionId;
-  onSelectSection(section: OS1SectionId): void;
+  activeSection: NurSectionId;
+  onSelectSection(section: NurSectionId): void;
 }
 
 export function Sidebar({ activeSection, onSelectSection }: SidebarProps): ReactElement {
@@ -53,11 +26,11 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
         <BrandLockup />
         <section className="sidebar-card">
           <h2>Локальный AI</h2>
-          <p>Gemma E4B работает на вашем Windows-компьютере.</p>
+          <p>Gemma 4 работает на вашем компьютере.</p>
           <StatusPill tone="success">ЛОКАЛЬНО</StatusPill>
         </section>
-        <nav className="sidebar__nav" aria-label="Luma sections">
-          {os1Sections.map((section) => {
+        <nav className="sidebar__nav" aria-label="Разделы Nur">
+          {nurSections.map((section) => {
             const Icon = icons[section.icon];
             const selected = activeSection === section.id;
 
@@ -78,7 +51,7 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
       <button className="voice-row" type="button">
         <MicOff size={16} aria-hidden="true" />
         <span>Голос</span>
-        <strong>ВЫКЛ</strong>
+        <strong>СКОРО</strong>
       </button>
     </aside>
   );
