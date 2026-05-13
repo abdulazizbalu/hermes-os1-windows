@@ -10,15 +10,15 @@ const modelLabels: Record<GemmaModelId, string> = {
 };
 
 const modelDescriptions: Record<GemmaModelId, string> = {
-  "gemma4:e2b": "Быстрый старт",
-  "gemma4:e4b": "Баланс качества",
+  "gemma4:e2b": "Легкая резервная модель",
+  "gemma4:e4b": "Встроенный выбор OS1",
   "gemma4:26b": "Мощная рабочая станция"
 };
 
 export function ConnectionsView(): ReactElement {
   const [connections, setConnections] = useState<ConnectionSummary[]>([]);
   const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
-  const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e2b");
+  const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e4b");
   const [runtime, setRuntime] = useState<LocalRuntime>("windows");
   const [label, setLabel] = useState("Локальная Gemma");
   const [workspacePath, setWorkspacePath] = useState("C:\\Users\\User");
@@ -28,15 +28,22 @@ export function ConnectionsView(): ReactElement {
 
   useEffect(() => {
     void window.os1.connections.list().then(setConnections);
-    void detectOllama();
+    void detectOllama(true);
   }, []);
 
-  async function detectOllama(): Promise<void> {
+  async function detectOllama(autoPrepare = false): Promise<void> {
     setIsBusy(true);
     try {
       const nextStatus = await window.os1.localAi.status();
       setLocalAiStatus(nextStatus);
       setSelectedModel(nextStatus.selectedModel);
+      if (autoPrepare && nextStatus.ollamaRunning && !isModelInstalledInStatus(nextStatus, nextStatus.selectedModel)) {
+        setStatus(`${modelLabels[nextStatus.selectedModel]} подготавливается...`);
+        const preparedStatus = await window.os1.localAi.pullModel({ model: nextStatus.selectedModel });
+        setLocalAiStatus(preparedStatus);
+        setStatus(`${modelLabels[nextStatus.selectedModel]} готова.`);
+        return;
+      }
       setStatus(nextStatus.ollamaRunning ? "Ollama готов." : nextStatus.error ?? "Ollama не запущен.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось проверить Ollama.");
@@ -50,7 +57,7 @@ export function ConnectionsView(): ReactElement {
     try {
       const nextStatus = await window.os1.localAi.pullModel({ model: selectedModel });
       setLocalAiStatus(nextStatus);
-      setStatus(`${modelLabels[selectedModel]} установлена.`);
+      setStatus(`${modelLabels[selectedModel]} готова.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось скачать Gemma 4.");
     } finally {
@@ -87,7 +94,7 @@ export function ConnectionsView(): ReactElement {
   }
 
   function isModelInstalled(model: GemmaModelId): boolean {
-    return localAiStatus?.models.find((item) => item.name === model)?.installed ?? false;
+    return localAiStatus ? isModelInstalledInStatus(localAiStatus, model) : false;
   }
 
   return (
@@ -106,11 +113,11 @@ export function ConnectionsView(): ReactElement {
               {localAiStatus?.version ? <span>Ollama {localAiStatus.version}</span> : <span>Ollama не найден</span>}
             </div>
             <div className="local-actions">
-              <button className="os1-button" type="button" onClick={detectOllama} disabled={isBusy}>
+              <button className="os1-button" type="button" onClick={() => void detectOllama()} disabled={isBusy}>
                 Проверить Ollama
               </button>
               <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy}>
-                Скачать Gemma 4
+                Подготовить Gemma 4 E4B
               </button>
               <button className="os1-button" type="button" onClick={checkRussian} disabled={isBusy}>
                 Проверить русский
@@ -131,7 +138,7 @@ export function ConnectionsView(): ReactElement {
                 <span>{modelLabels[model]}</span>
                 <small>{modelDescriptions[model]}</small>
                 <StatusPill tone={isModelInstalled(model) ? "success" : "muted"}>
-                  {isModelInstalled(model) ? "УСТАНОВЛЕНА" : "ЛОКАЛЬНО"}
+                  {isModelInstalled(model) ? "ГОТОВА" : "В ПАКЕТЕ"}
                 </StatusPill>
               </button>
             ))}
@@ -183,4 +190,8 @@ export function ConnectionsView(): ReactElement {
       </div>
     </SectionFrame>
   );
+}
+
+function isModelInstalledInStatus(status: LocalAiStatus, model: GemmaModelId): boolean {
+  return status.models.find((item) => item.name === model)?.installed ?? false;
 }

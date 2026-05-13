@@ -55,7 +55,7 @@ export class OllamaClient {
     this.runCommand = runCommand;
   }
 
-  async status(selectedModel: GemmaModelId = "gemma4:e2b"): Promise<LocalAiStatus> {
+  async status(selectedModel: GemmaModelId = "gemma4:e4b"): Promise<LocalAiStatus> {
     const version = await this.detectVersion();
 
     try {
@@ -72,7 +72,7 @@ export class OllamaClient {
       return {
         ollamaInstalled: true,
         ollamaRunning: true,
-        recommendedModel: "gemma4:e2b",
+        recommendedModel: "gemma4:e4b",
         selectedModel,
         version,
         models: gemmaModelIds.map((model) => ({
@@ -85,7 +85,7 @@ export class OllamaClient {
       return {
         ollamaInstalled: version !== undefined,
         ollamaRunning: false,
-        recommendedModel: "gemma4:e2b",
+        recommendedModel: "gemma4:e4b",
         selectedModel,
         ...(version ? { version } : {}),
         error: `Ollama is not running on ${this.serverUrl}.`,

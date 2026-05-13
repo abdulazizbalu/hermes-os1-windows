@@ -19,8 +19,8 @@ describe("OllamaClient", () => {
     await expect(client.status()).resolves.toEqual({
       ollamaInstalled: true,
       ollamaRunning: true,
-      recommendedModel: "gemma4:e2b",
-      selectedModel: "gemma4:e2b",
+      recommendedModel: "gemma4:e4b",
+      selectedModel: "gemma4:e4b",
       version: "0.12.0",
       models: [
         { name: "gemma4:e2b", installed: false },
@@ -39,7 +39,7 @@ describe("OllamaClient", () => {
     await expect(client.status("gemma4:e2b")).resolves.toEqual({
       ollamaInstalled: false,
       ollamaRunning: false,
-      recommendedModel: "gemma4:e2b",
+      recommendedModel: "gemma4:e4b",
       selectedModel: "gemma4:e2b",
       error: "Ollama is not running on http://127.0.0.1:11434.",
       models: [

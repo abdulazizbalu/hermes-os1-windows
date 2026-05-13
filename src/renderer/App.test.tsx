@@ -22,8 +22,8 @@ beforeEach(() => {
       status: vi.fn().mockResolvedValue({
         ollamaInstalled: false,
         ollamaRunning: false,
-        recommendedModel: "gemma4:e2b",
-        selectedModel: "gemma4:e2b",
+        recommendedModel: "gemma4:e4b",
+        selectedModel: "gemma4:e4b",
         models: []
       }),
       pullModel: vi.fn(),

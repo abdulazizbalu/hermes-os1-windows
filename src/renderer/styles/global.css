@@ -13,7 +13,9 @@ body,
 
 body {
   margin: 0;
-  background: var(--os1-coral);
+  background:
+    linear-gradient(135deg, rgba(207, 91, 68, 0.96), rgba(226, 207, 177, 0.92)),
+    var(--os1-coral);
   color: var(--os1-on-cream-primary);
   font-family: var(--os1-font-sans);
   letter-spacing: 0;
@@ -43,7 +45,9 @@ button {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--os1-bg-cream);
+  background:
+    linear-gradient(135deg, rgba(255, 247, 230, 0.74), rgba(225, 203, 169, 0.78)),
+    var(--os1-bg-cream);
 }
 
 .os1-scroll {
@@ -52,9 +56,9 @@ button {
 }
 
 .os1-glass {
-  background: var(--os1-glass-fill);
+  background: rgba(255, 255, 255, 0.2);
   border: 1px solid var(--os1-glass-border);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(24px) saturate(140%);
 }
 
 .os1-button {
@@ -65,9 +69,10 @@ button {
   min-height: 34px;
   padding: 0 13px;
   color: var(--os1-on-coral-primary);
-  background: var(--os1-glass-fill);
+  background: rgba(205, 86, 63, 0.86);
   border: 1px solid var(--os1-glass-border);
   border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(88, 51, 38, 0.12);
   cursor: pointer;
   transition:
     background var(--os1-motion-fast) ease,
@@ -76,7 +81,7 @@ button {
 }
 
 .os1-button:hover {
-  background: var(--os1-glass-fill-hover);
+  background: rgba(214, 96, 70, 0.95);
   border-color: var(--os1-glass-border-hover);
 }
 
@@ -140,7 +145,9 @@ button {
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px) saturate(145%);
 }
 
 .sidebar-card h2 {
@@ -191,8 +198,9 @@ button {
 
 .sidebar__item--selected {
   color: var(--os1-on-coral-primary);
-  background: var(--os1-glass-fill);
+  background: rgba(255, 255, 255, 0.22);
   box-shadow: inset 0 0 0 1px var(--os1-glass-border);
+  backdrop-filter: blur(18px);
 }
 
 .sidebar__item:hover,
@@ -261,8 +269,12 @@ button {
 .section-frame__header > * {
   padding: 22px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(56, 40, 30, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(56, 40, 30, 0.08),
+    0 18px 46px rgba(88, 51, 38, 0.11);
+  backdrop-filter: blur(24px) saturate(145%);
 }
 
 .section-frame__eyebrow {
@@ -346,8 +358,12 @@ button {
 .panel-form,
 .connection-list {
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(56, 40, 30, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 0 0 0 1px rgba(56, 40, 30, 0.07),
+    0 18px 44px rgba(88, 51, 38, 0.1);
+  backdrop-filter: blur(24px) saturate(145%);
 }
 
 .empty-panel {
@@ -460,15 +476,17 @@ button {
   border: 1px solid rgba(56, 40, 30, 0.12);
   border-radius: 8px;
   color: var(--os1-on-cream-primary);
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.28);
   cursor: pointer;
   text-align: left;
+  backdrop-filter: blur(18px) saturate(135%);
 }
 
 .model-card:hover,
 .model-card--selected {
   border-color: rgba(216, 93, 68, 0.5);
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.46);
+  box-shadow: 0 12px 30px rgba(88, 51, 38, 0.1);
 }
 
 .model-card span {
@@ -495,8 +513,10 @@ button {
 
 .connection-card {
   padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(18px) saturate(135%);
 }
 
 .connection-card h2 {
