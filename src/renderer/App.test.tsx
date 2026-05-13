@@ -20,6 +20,12 @@ beforeEach(() => {
       startOllama: vi.fn(),
       pullModel: vi.fn(),
       generateText: vi.fn()
+    },
+    history: {
+      list: vi.fn().mockResolvedValue([]),
+      save: vi.fn().mockImplementation(async (c) => c),
+      delete: vi.fn(),
+      clear: vi.fn()
     }
   };
 });
@@ -40,6 +46,6 @@ describe("Nur shell", () => {
     await user.click(screen.getByRole("button", { name: "Открыть" }));
     await user.click(screen.getByRole("button", { name: "Письма" }));
 
-    expect(screen.getByRole("heading", { name: "Письма" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Напишите письмо за минуту" })).toBeInTheDocument();
   });
 });

@@ -4,6 +4,8 @@ export const nurSections = [
   { id: "summarize", title: "Суммировать", icon: "AlignLeft" },
   { id: "translate", title: "Перевести", icon: "Languages" },
   { id: "improve", title: "Улучшить", icon: "Wand2" },
+  { id: "converter", title: "Конвертер", icon: "Calculator" },
+  { id: "transliterate", title: "Транслитерация", icon: "ArrowRightLeft" },
   { id: "history", title: "История", icon: "Clock3" },
   { id: "settings", title: "Настройки", icon: "Settings" }
 ] as const;

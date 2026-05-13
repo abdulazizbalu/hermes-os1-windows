@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
   GenerateLocalTextRequest,
+  HistoryConversation,
   NurApi,
   PullLocalModelRequest,
   ipcChannels
@@ -16,6 +17,12 @@ const api: NurApi = {
     startOllama: () => ipcRenderer.invoke(ipcChannels.localAiStartOllama),
     pullModel: (request: PullLocalModelRequest) => ipcRenderer.invoke(ipcChannels.localAiPullModel, request),
     generateText: (request: GenerateLocalTextRequest) => ipcRenderer.invoke(ipcChannels.localAiGenerateText, request)
+  },
+  history: {
+    list: () => ipcRenderer.invoke(ipcChannels.historyList),
+    save: (conversation: HistoryConversation) => ipcRenderer.invoke(ipcChannels.historySave, conversation),
+    delete: (id: string) => ipcRenderer.invoke(ipcChannels.historyDelete, id),
+    clear: () => ipcRenderer.invoke(ipcChannels.historyClear)
   }
 };
 

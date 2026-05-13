@@ -1,5 +1,6 @@
+import { Plus } from "lucide-react";
 import { FormEvent, ReactElement, useEffect, useRef, useState } from "react";
-import { GemmaModelId, LocalAiStatus } from "../../shared/ipc";
+import { GemmaModelId, HistoryConversation, LocalAiStatus } from "../../shared/ipc";
 import { SectionFrame } from "../components/SectionFrame";
 import { StatusPill } from "../components/StatusPill";
 
@@ -15,11 +16,18 @@ export function ChatView(): ReactElement {
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
+  const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
+  const [createdAt] = useState<string>(() => new Date().toISOString());
+  const conversationRef = useRef<{ id: string; createdAt: string }>({ id: conversationId, createdAt });
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void window.os1.localAi.status().then(setLocalAiStatus);
   }, []);
+
+  useEffect(() => {
+    conversationRef.current = { id: conversationId, createdAt };
+  }, [conversationId, createdAt]);
 
   useEffect(() => {
     const node = scrollerRef.current;
@@ -32,6 +40,31 @@ export function ChatView(): ReactElement {
   const modelReady =
     localAiStatus?.models.find((item) => item.name === selectedModel)?.installed ?? false;
   const canSend = Boolean(localAiStatus?.ollamaRunning && modelReady && !isSending);
+
+  function startNewConversation(): void {
+    setMessages([]);
+    setConversationId(crypto.randomUUID());
+  }
+
+  async function persistConversation(finalMessages: ChatMessage[]): Promise<void> {
+    if (finalMessages.length === 0) return;
+    const firstUserMessage = finalMessages.find((m) => m.role === "user")?.content ?? "Новый разговор";
+    const title = firstUserMessage.length > 60 ? firstUserMessage.slice(0, 57) + "..." : firstUserMessage;
+    const conversation: HistoryConversation = {
+      id: conversationRef.current.id,
+      title,
+      messages: finalMessages
+        .filter((m) => !m.pending)
+        .map((m) => ({ role: m.role, content: m.content })),
+      createdAt: conversationRef.current.createdAt,
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await window.os1.history.save(conversation);
+    } catch {
+      // history save failures shouldn't break the chat flow
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -60,13 +93,16 @@ export function ChatView(): ReactElement {
         model: selectedModel,
         prompt: text
       });
-      setMessages((prev) =>
-        prev.map((message) =>
+      const responseText = response.response.trim();
+      setMessages((prev) => {
+        const next = prev.map((message) =>
           message.id === assistantId
-            ? { ...message, content: response.response.trim(), pending: false }
+            ? { ...message, content: responseText, pending: false }
             : message
-        )
-      );
+        );
+        void persistConversation(next);
+        return next;
+      });
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Не удалось получить ответ.";
       setMessages((prev) =>
@@ -95,7 +131,7 @@ export function ChatView(): ReactElement {
     <SectionFrame
       eyebrow="Чат"
       title="Спросите Nur"
-      description="Свободный диалог с локальной Gemma 4. Всё работает на вашем компьютере, без облака."
+      description="Свободный диалог с локальной Gemma 4. Разговоры сохраняются в раздел «История»."
     >
       <div className="chat-shell">
         <div className="chat-status">
@@ -108,6 +144,12 @@ export function ChatView(): ReactElement {
                   ? "Подготовьте модель в разделе «Настройки»."
                   : ""}
             </span>
+          ) : null}
+          {messages.length > 0 ? (
+            <button type="button" className="chat-new" onClick={startNewConversation}>
+              <Plus size={14} aria-hidden="true" />
+              Новый чат
+            </button>
           ) : null}
         </div>
 

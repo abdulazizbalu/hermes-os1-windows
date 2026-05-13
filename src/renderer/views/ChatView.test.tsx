@@ -25,6 +25,12 @@ beforeEach(() => {
       startOllama: vi.fn(),
       pullModel: vi.fn(),
       generateText: vi.fn().mockResolvedValue({ response: "Привет! Чем помочь?" })
+    },
+    history: {
+      list: vi.fn().mockResolvedValue([]),
+      save: vi.fn().mockImplementation(async (c) => c),
+      delete: vi.fn(),
+      clear: vi.fn()
     }
   };
 });

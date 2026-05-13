@@ -4,6 +4,7 @@ import { join } from "node:path";
 export interface NurAppPaths {
   appData: string;
   logs: string;
+  history: string;
 }
 
 export function getNurAppPaths(): NurAppPaths {
@@ -11,7 +12,8 @@ export function getNurAppPaths(): NurAppPaths {
 
   return {
     appData,
-    logs: join(appData, "logs")
+    logs: join(appData, "logs"),
+    history: join(appData, "history.json")
   };
 }
 

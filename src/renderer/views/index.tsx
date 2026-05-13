@@ -1,8 +1,27 @@
 import { ComponentType, ReactElement } from "react";
 import { NurSectionId } from "../../shared/sections";
 import { ChatView } from "./ChatView";
-import { SettingsView } from "./SettingsView";
+import { ConverterView } from "./ConverterView";
+import { EmailView } from "./EmailView";
+import { HistoryView } from "./HistoryView";
+import { ImproveView } from "./ImproveView";
 import { SectionStubView } from "./SectionStubView";
+import { SettingsView } from "./SettingsView";
+import { SummarizeView } from "./SummarizeView";
+import { TranslateView } from "./TranslateView";
+import { TransliterateView } from "./TransliterateView";
+
+const viewMap: Partial<Record<NurSectionId, ComponentType>> = {
+  chat: ChatView,
+  email: EmailView,
+  summarize: SummarizeView,
+  translate: TranslateView,
+  improve: ImproveView,
+  converter: ConverterView,
+  transliterate: TransliterateView,
+  history: HistoryView,
+  settings: SettingsView
+};
 
 const sectionMeta: Record<NurSectionId, { title: string; description: string }> = {
   chat: {
@@ -25,6 +44,14 @@ const sectionMeta: Record<NurSectionId, { title: string; description: string }> 
     title: "Улучшить",
     description: "Исправит грамматику, перепишет в нужном стиле, сделает короче или формальнее."
   },
+  converter: {
+    title: "Конвертер",
+    description: "Единицы, валюты, размеры файлов, число прописью."
+  },
+  transliterate: {
+    title: "Транслитерация",
+    description: "Кириллица ↔ латиница для русского и узбекского."
+  },
   history: {
     title: "История",
     description: "Все ваши прошлые разговоры с Nur — найдите и продолжите там, где остановились."
@@ -36,15 +63,10 @@ const sectionMeta: Record<NurSectionId, { title: string; description: string }> 
 };
 
 export function getSectionView(section: NurSectionId): ComponentType {
-  if (section === "chat") {
-    return ChatView;
-  }
-  if (section === "settings") {
-    return SettingsView;
-  }
+  const view = viewMap[section];
+  if (view) return view;
 
   const meta = sectionMeta[section];
-
   return function View(): ReactElement {
     return (
       <SectionStubView

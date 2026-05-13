@@ -1,4 +1,15 @@
-import { AlignLeft, Clock3, Languages, Mail, MessageCircle, MicOff, Settings, Wand2 } from "lucide-react";
+import {
+  AlignLeft,
+  ArrowRightLeft,
+  Calculator,
+  Clock3,
+  Languages,
+  Mail,
+  MessageCircle,
+  MicOff,
+  Settings,
+  Wand2
+} from "lucide-react";
 import { ReactElement } from "react";
 import { nurSections, NurSectionId } from "../../shared/sections";
 import { BrandLockup } from "./BrandLockup";
@@ -6,6 +17,8 @@ import { StatusPill } from "./StatusPill";
 
 const icons = {
   AlignLeft,
+  ArrowRightLeft,
+  Calculator,
   Clock3,
   Languages,
   Mail,

@@ -1,11 +1,13 @@
 import { app, ipcMain } from "electron";
 import {
   assertGenerateLocalTextRequest,
+  assertHistoryConversation,
   assertPullLocalModelRequest,
   ipcChannels
 } from "../shared/ipc.js";
-import type { AppInfo } from "../shared/ipc.js";
+import type { AppInfo, HistoryConversation } from "../shared/ipc.js";
 import { getNurAppPaths } from "./appPaths.js";
+import { clearHistory, deleteConversation, readHistory, upsertConversation } from "./historyStore.js";
 import { OllamaClient } from "./ollamaClient.js";
 
 export function registerIpcHandlers(): void {
@@ -53,5 +55,26 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(ipcChannels.localAiGenerateText, async (_event, payload: unknown) => {
     const request = assertGenerateLocalTextRequest(payload);
     return new OllamaClient().generateText(request.model, request.prompt);
+  });
+
+  ipcMain.handle(ipcChannels.historyList, async (): Promise<HistoryConversation[]> => {
+    return readHistory();
+  });
+
+  ipcMain.handle(ipcChannels.historySave, async (_event, payload: unknown): Promise<HistoryConversation> => {
+    const conv = assertHistoryConversation(payload);
+    return upsertConversation(conv);
+  });
+
+  ipcMain.handle(ipcChannels.historyDelete, async (_event, payload: unknown): Promise<void> => {
+    const id = String(payload ?? "");
+    if (!id) {
+      throw new Error("Conversation id is required.");
+    }
+    await deleteConversation(id);
+  });
+
+  ipcMain.handle(ipcChannels.historyClear, async (): Promise<void> => {
+    await clearHistory();
   });
 }
