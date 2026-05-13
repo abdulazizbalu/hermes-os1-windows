@@ -361,6 +361,13 @@ button {
   gap: 18px;
 }
 
+.orgo-setup-grid {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
 .panel-form {
   display: grid;
   gap: 14px;
@@ -395,10 +402,68 @@ button {
   background: var(--os1-coral);
 }
 
+.panel-form .status-pill {
+  justify-self: start;
+}
+
 .panel-form p {
   margin: 0;
   color: var(--os1-on-cream-secondary);
   font-size: 13px;
+}
+
+.orgo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.workspace-list,
+.computer-list {
+  display: grid;
+  gap: 8px;
+}
+
+.workspace-card,
+.computer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid rgba(56, 40, 30, 0.12);
+  border-radius: 8px;
+  color: var(--os1-on-cream-primary);
+  background: rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  text-align: left;
+}
+
+.workspace-card:hover,
+.computer-row:hover,
+.workspace-card--selected,
+.computer-row--selected {
+  border-color: rgba(216, 93, 68, 0.5);
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.workspace-card span,
+.computer-row span {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 300;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-card small,
+.computer-row small {
+  color: var(--os1-on-cream-muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .connection-list {
