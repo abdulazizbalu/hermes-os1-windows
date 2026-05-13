@@ -9,59 +9,75 @@ beforeEach(() => {
       info: vi.fn(),
       diagnostics: vi.fn()
     },
-    orgo: {
-      credentialStatus: vi.fn().mockResolvedValue({ hasApiKey: false }),
-      saveApiKey: vi.fn().mockResolvedValue({ hasApiKey: true }),
-      clearApiKey: vi.fn().mockResolvedValue({ hasApiKey: false }),
-      listWorkspaces: vi.fn().mockResolvedValue([
-        {
-          id: "workspace-1",
-          name: "Main",
-          computers: [{ id: "computer-1", name: "Hermes", status: "running" }]
-        }
-      ]),
-      createComputer: vi.fn().mockResolvedValue({ id: "computer-2", name: "New VM", status: "creating" })
-    },
     connections: {
       list: vi.fn().mockResolvedValue([]),
       saveDraft: vi.fn(),
-      saveOrgo: vi.fn().mockResolvedValue({
+      saveLocal: vi.fn().mockResolvedValue({
         id: "connection-1",
-        label: "Hermes",
-        transport: "orgo",
-        destination: "Main / Hermes",
+        label: "Local Gemma",
+        transport: "local",
+        destination: "WINDOWS / gemma4:e4b",
+        model: "gemma4:e4b",
+        runtime: "windows",
+        workspacePath: "C:\\Users\\User",
         createdAt: "2026-05-13T00:00:00.000Z"
+      })
+    },
+    localAi: {
+      status: vi.fn().mockResolvedValue({
+        ollamaInstalled: true,
+        ollamaRunning: true,
+        recommendedModel: "gemma4:e4b",
+        selectedModel: "gemma4:e4b",
+        version: "0.12.0",
+        models: [
+          { name: "gemma4:e2b", installed: false },
+          { name: "gemma4:e4b", installed: true, size: 9600000000 },
+          { name: "gemma4:26b", installed: false }
+        ]
+      }),
+      pullModel: vi.fn().mockResolvedValue({
+        ollamaInstalled: true,
+        ollamaRunning: true,
+        recommendedModel: "gemma4:e4b",
+        selectedModel: "gemma4:e4b",
+        version: "0.12.0",
+        models: [
+          { name: "gemma4:e2b", installed: false },
+          { name: "gemma4:e4b", installed: true, size: 9600000000 },
+          { name: "gemma4:26b", installed: false }
+        ]
       })
     }
   };
 });
 
 describe("ConnectionsView", () => {
-  it("saves an Orgo API key and loads workspaces", async () => {
+  it("detects Ollama and pulls the selected Gemma model", async () => {
     const user = userEvent.setup();
     render(<ConnectionsView />);
 
-    await user.type(screen.getByLabelText("Orgo API Key"), "sk-live");
-    await user.click(screen.getByRole("button", { name: "Verify & Save" }));
+    await user.click(await screen.findByRole("button", { name: "Detect Ollama" }));
+    await user.click(screen.getByRole("button", { name: "Pull Gemma 4" }));
 
-    await waitFor(() => expect(window.os1.orgo.saveApiKey).toHaveBeenCalledWith({ apiKey: "sk-live" }));
-    expect(await screen.findByText("Main")).toBeInTheDocument();
+    await waitFor(() => expect(window.os1.localAi.pullModel).toHaveBeenCalledWith({ model: "gemma4:e4b" }));
+    expect(await screen.findByText("Ollama 0.12.0")).toBeInTheDocument();
   });
 
-  it("saves selected workspace and computer as an Orgo connection", async () => {
+  it("saves a Local Gemma workspace connection", async () => {
     const user = userEvent.setup();
     render(<ConnectionsView />);
 
-    await user.click(await screen.findByRole("button", { name: "Load Workspaces" }));
-    await user.click(await screen.findByRole("button", { name: "Save Connection" }));
+    await user.clear(screen.getByLabelText("Workspace path"));
+    await user.type(screen.getByLabelText("Workspace path"), "C:\\Users\\User");
+    await user.click(await screen.findByRole("button", { name: "Save Local Workspace" }));
 
     await waitFor(() =>
-      expect(window.os1.connections.saveOrgo).toHaveBeenCalledWith({
-        label: "Hermes",
-        workspaceId: "workspace-1",
-        workspaceName: "Main",
-        computerId: "computer-1",
-        computerName: "Hermes"
+      expect(window.os1.connections.saveLocal).toHaveBeenCalledWith({
+        label: "Local Gemma",
+        runtime: "windows",
+        model: "gemma4:e4b",
+        workspacePath: "C:\\Users\\User"
       })
     );
   });

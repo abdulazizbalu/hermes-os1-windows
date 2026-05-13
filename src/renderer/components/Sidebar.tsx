@@ -53,7 +53,7 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
         <BrandLockup />
         <section className="sidebar-card">
           <h2>No active host</h2>
-          <p>Connect an Orgo VM or SSH host.</p>
+          <p>Connect a Local Gemma or SSH host.</p>
           <StatusPill tone="muted">OFFLINE</StatusPill>
         </section>
         <nav className="sidebar__nav" aria-label="OS1 sections">

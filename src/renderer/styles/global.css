@@ -361,7 +361,7 @@ button {
   gap: 18px;
 }
 
-.orgo-setup-grid {
+.local-ai-grid {
   display: grid;
   align-content: start;
   gap: 12px;
@@ -396,6 +396,16 @@ button {
   outline: none;
 }
 
+.panel-form select {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(56, 40, 30, 0.18);
+  border-radius: 8px;
+  color: var(--os1-on-cream-primary);
+  background: rgba(255, 255, 255, 0.26);
+  outline: none;
+}
+
 .panel-form .os1-button {
   justify-self: start;
   color: var(--os1-on-coral-primary);
@@ -412,22 +422,29 @@ button {
   font-size: 13px;
 }
 
-.orgo-actions {
+.local-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.workspace-list,
-.computer-list {
+.local-ai-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--os1-on-cream-secondary);
+  font-size: 13px;
+}
+
+.model-grid {
   display: grid;
   gap: 8px;
 }
 
-.workspace-card,
-.computer-row {
+.model-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -441,16 +458,13 @@ button {
   text-align: left;
 }
 
-.workspace-card:hover,
-.computer-row:hover,
-.workspace-card--selected,
-.computer-row--selected {
+.model-card:hover,
+.model-card--selected {
   border-color: rgba(216, 93, 68, 0.5);
   background: rgba(255, 255, 255, 0.32);
 }
 
-.workspace-card span,
-.computer-row span {
+.model-card span {
   overflow: hidden;
   font-size: 15px;
   font-weight: 300;
@@ -458,8 +472,7 @@ button {
   white-space: nowrap;
 }
 
-.workspace-card small,
-.computer-row small {
+.model-card small {
   color: var(--os1-on-cream-muted);
   font-size: 11px;
   letter-spacing: 1px;

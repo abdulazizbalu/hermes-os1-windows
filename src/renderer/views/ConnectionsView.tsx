@@ -1,117 +1,57 @@
 import { FormEvent, ReactElement, useEffect, useState } from "react";
-import { ConnectionSummary, OrgoComputerSummary, OrgoWorkspaceSummary } from "../../shared/ipc";
+import { ConnectionSummary, GemmaModelId, LocalAiStatus, LocalRuntime, gemmaModelIds } from "../../shared/ipc";
 import { SectionFrame } from "../components/SectionFrame";
 import { StatusPill } from "../components/StatusPill";
 
+const modelLabels: Record<GemmaModelId, string> = {
+  "gemma4:e2b": "Gemma 4 E2B",
+  "gemma4:e4b": "Gemma 4 E4B",
+  "gemma4:26b": "Gemma 4 26B"
+};
+
+const modelDescriptions: Record<GemmaModelId, string> = {
+  "gemma4:e2b": "Light local model",
+  "gemma4:e4b": "Recommended local model",
+  "gemma4:26b": "Workstation model"
+};
+
 export function ConnectionsView(): ReactElement {
   const [connections, setConnections] = useState<ConnectionSummary[]>([]);
-  const [apiKey, setApiKey] = useState("");
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [workspaces, setWorkspaces] = useState<OrgoWorkspaceSummary[]>([]);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
-  const [selectedComputerId, setSelectedComputerId] = useState("");
-  const [computerName, setComputerName] = useState("Hermes");
-  const [connectionName, setConnectionName] = useState("Hermes");
+  const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
+  const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e4b");
+  const [runtime, setRuntime] = useState<LocalRuntime>("windows");
+  const [label, setLabel] = useState("Local Gemma");
+  const [workspacePath, setWorkspacePath] = useState("C:\\Users\\User");
   const [status, setStatus] = useState("Ready.");
   const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
     void window.os1.connections.list().then(setConnections);
-    void window.os1.orgo.credentialStatus().then((credentialStatus) => {
-      setHasApiKey(credentialStatus.hasApiKey);
-      setStatus(credentialStatus.hasApiKey ? "Orgo key saved." : "Add Orgo API key.");
-    });
+    void detectOllama();
   }, []);
 
-  const selectedWorkspace = workspaces.find((workspace) => workspace.id === selectedWorkspaceId);
-  const selectedComputer = selectedWorkspace?.computers.find((computer) => computer.id === selectedComputerId);
-
-  function selectWorkspace(workspace: OrgoWorkspaceSummary): void {
-    const computer = workspace.computers[0];
-    setSelectedWorkspaceId(workspace.id);
-    setSelectedComputerId(computer?.id ?? "");
-    setConnectionName(computer?.name ?? workspace.name);
-  }
-
-  function selectComputer(computer: OrgoComputerSummary): void {
-    setSelectedComputerId(computer.id);
-    setConnectionName(computer.name);
-  }
-
-  function applyWorkspaceList(nextWorkspaces: OrgoWorkspaceSummary[]): void {
-    setWorkspaces(nextWorkspaces);
-    const workspace = nextWorkspaces[0];
-    if (!workspace) {
-      setSelectedWorkspaceId("");
-      setSelectedComputerId("");
-      setConnectionName("");
-      return;
-    }
-
-    selectWorkspace(workspace);
-  }
-
-  async function loadWorkspaces(): Promise<void> {
+  async function detectOllama(): Promise<void> {
     setIsBusy(true);
     try {
-      const nextWorkspaces = await window.os1.orgo.listWorkspaces();
-      applyWorkspaceList(nextWorkspaces);
-      setStatus(nextWorkspaces.length > 0 ? "Workspaces loaded." : "No Orgo workspaces found.");
+      const nextStatus = await window.os1.localAi.status();
+      setLocalAiStatus(nextStatus);
+      setSelectedModel(nextStatus.selectedModel);
+      setStatus(nextStatus.ollamaRunning ? "Ollama ready." : nextStatus.error ?? "Ollama not running.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not load Orgo workspaces.");
+      setStatus(error instanceof Error ? error.message : "Could not detect Ollama.");
     } finally {
       setIsBusy(false);
     }
   }
 
-  async function saveApiKey(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
+  async function pullModel(): Promise<void> {
     setIsBusy(true);
     try {
-      const credentialStatus = await window.os1.orgo.saveApiKey({ apiKey });
-      setHasApiKey(credentialStatus.hasApiKey);
-      setApiKey("");
-      setStatus("Orgo key verified.");
-      await loadWorkspaces();
+      const nextStatus = await window.os1.localAi.pullModel({ model: selectedModel });
+      setLocalAiStatus(nextStatus);
+      setStatus(`${modelLabels[selectedModel]} installed.`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not verify Orgo API key.");
-    } finally {
-      setIsBusy(false);
-    }
-  }
-
-  async function clearApiKey(): Promise<void> {
-    const credentialStatus = await window.os1.orgo.clearApiKey();
-    setHasApiKey(credentialStatus.hasApiKey);
-    applyWorkspaceList([]);
-    setStatus("Orgo key cleared.");
-  }
-
-  async function createComputer(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    if (!selectedWorkspace) {
-      setStatus("Select a workspace first.");
-      return;
-    }
-
-    setIsBusy(true);
-    try {
-      const computer = await window.os1.orgo.createComputer({
-        workspaceId: selectedWorkspace.id,
-        computerName
-      });
-      setWorkspaces((current) =>
-        current.map((workspace) =>
-          workspace.id === selectedWorkspace.id
-            ? { ...workspace, computers: [...workspace.computers, computer] }
-            : workspace
-        )
-      );
-      setSelectedComputerId(computer.id);
-      setConnectionName(computer.name);
-      setStatus(`Created ${computer.name}.`);
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not create Orgo computer.");
+      setStatus(error instanceof Error ? error.message : "Could not pull Gemma 4.");
     } finally {
       setIsBusy(false);
     }
@@ -119,116 +59,90 @@ export function ConnectionsView(): ReactElement {
 
   async function saveConnection(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (!selectedWorkspace || !selectedComputer) {
-      setStatus("Select an Orgo computer first.");
-      return;
-    }
-
-    const label = connectionName.trim() || selectedComputer.name;
-    const saved = await window.os1.connections.saveOrgo({
+    const saved = await window.os1.connections.saveLocal({
       label,
-      workspaceId: selectedWorkspace.id,
-      workspaceName: selectedWorkspace.name,
-      computerId: selectedComputer.id,
-      computerName: selectedComputer.name
+      runtime,
+      model: selectedModel,
+      workspacePath
     });
     setConnections((current) => [saved, ...current]);
     setStatus(`Saved ${saved.label}.`);
   }
 
+  function isModelInstalled(model: GemmaModelId): boolean {
+    return localAiStatus?.models.find((item) => item.name === model)?.installed ?? false;
+  }
+
   return (
     <SectionFrame
       eyebrow="Connections"
-      title="Connect Orgo"
-      description="Set up the OS1 Windows connection layer with encrypted Orgo credentials, workspace discovery, and computer selection."
+      title="Local Gemma"
+      description="Run OS1 against a free local Gemma 4 model through Ollama instead of a cloud computer provider."
     >
       <div className="connections-grid">
-        <div className="orgo-setup-grid">
-          <form className="panel-form" onSubmit={saveApiKey}>
-            <label htmlFor="orgo-api-key">
-              <span>Orgo API Key</span>
-              <input
-                id="orgo-api-key"
-                aria-label="Orgo API Key"
-                type="password"
-                value={apiKey}
-                onChange={(event) => setApiKey(event.target.value)}
-              />
-            </label>
-            <div className="orgo-actions">
-              <button className="os1-button" type="submit" disabled={isBusy}>
-                Verify & Save
+        <div className="local-ai-grid">
+          <section className="panel-form">
+            <div className="local-ai-status">
+              <StatusPill tone={localAiStatus?.ollamaRunning ? "success" : "warning"}>
+                {localAiStatus?.ollamaRunning ? "OLLAMA READY" : "OLLAMA OFF"}
+              </StatusPill>
+              {localAiStatus?.version ? <span>Ollama {localAiStatus.version}</span> : <span>Ollama not detected</span>}
+            </div>
+            <div className="local-actions">
+              <button className="os1-button" type="button" onClick={detectOllama} disabled={isBusy}>
+                Detect Ollama
               </button>
-              <button className="os1-button" type="button" onClick={clearApiKey} disabled={isBusy}>
-                Clear Key
-              </button>
-              <button className="os1-button" type="button" onClick={loadWorkspaces} disabled={isBusy}>
-                Load Workspaces
+              <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy}>
+                Pull Gemma 4
               </button>
             </div>
-            <StatusPill tone={hasApiKey ? "success" : "muted"}>{hasApiKey ? "KEY SAVED" : "NO KEY"}</StatusPill>
             <p>{status}</p>
-          </form>
+          </section>
 
-          <div className="workspace-list" aria-label="Workspaces">
-            {workspaces.map((workspace) => (
+          <div className="model-grid" aria-label="Gemma models">
+            {gemmaModelIds.map((model) => (
               <button
-                className={
-                  workspace.id === selectedWorkspaceId ? "workspace-card workspace-card--selected" : "workspace-card"
-                }
-                key={workspace.id}
+                className={model === selectedModel ? "model-card model-card--selected" : "model-card"}
+                key={model}
                 type="button"
-                onClick={() => selectWorkspace(workspace)}
+                onClick={() => setSelectedModel(model)}
               >
-                <span>{workspace.name}</span>
-                <small>{workspace.computers.length} computers</small>
+                <span>{modelLabels[model]}</span>
+                <small>{modelDescriptions[model]}</small>
+                <StatusPill tone={isModelInstalled(model) ? "success" : "muted"}>
+                  {isModelInstalled(model) ? "INSTALLED" : "LOCAL"}
+                </StatusPill>
               </button>
             ))}
           </div>
 
-          {selectedWorkspace ? (
-            <div className="computer-list" aria-label="Computers">
-              {selectedWorkspace.computers.map((computer) => (
-                <button
-                  className={
-                    computer.id === selectedComputerId ? "computer-row computer-row--selected" : "computer-row"
-                  }
-                  key={computer.id}
-                  type="button"
-                  onClick={() => selectComputer(computer)}
-                >
-                  <span>{computer.name}</span>
-                  <small>{computer.status}</small>
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <form className="panel-form" onSubmit={createComputer}>
-            <label htmlFor="orgo-computer-name">
-              <span>Computer name</span>
-              <input
-                id="orgo-computer-name"
-                value={computerName}
-                onChange={(event) => setComputerName(event.target.value)}
-              />
-            </label>
-            <button className="os1-button" type="submit" disabled={isBusy || !selectedWorkspace}>
-              Create Computer
-            </button>
-          </form>
-
           <form className="panel-form" onSubmit={saveConnection}>
-            <label htmlFor="orgo-connection-name">
+            <label htmlFor="local-connection-label">
               <span>Connection name</span>
+              <input id="local-connection-label" value={label} onChange={(event) => setLabel(event.target.value)} />
+            </label>
+            <label htmlFor="local-runtime">
+              <span>Runtime</span>
+              <select
+                id="local-runtime"
+                value={runtime}
+                onChange={(event) => setRuntime(event.target.value as LocalRuntime)}
+              >
+                <option value="windows">Windows</option>
+                <option value="wsl">WSL</option>
+              </select>
+            </label>
+            <label htmlFor="local-workspace-path">
+              <span>Workspace path</span>
               <input
-                id="orgo-connection-name"
-                value={connectionName}
-                onChange={(event) => setConnectionName(event.target.value)}
+                id="local-workspace-path"
+                aria-label="Workspace path"
+                value={workspacePath}
+                onChange={(event) => setWorkspacePath(event.target.value)}
               />
             </label>
-            <button className="os1-button" type="submit" disabled={!selectedWorkspace || !selectedComputer}>
-              Save Connection
+            <button className="os1-button" type="submit" disabled={isBusy}>
+              Save Local Workspace
             </button>
           </form>
         </div>
@@ -241,7 +155,7 @@ export function ConnectionsView(): ReactElement {
             <article key={connection.id} className="connection-card">
               <h2>{connection.label}</h2>
               <p>{connection.destination}</p>
-              <span>{connection.transport}</span>
+              <span>{connection.model ?? connection.transport}</span>
             </article>
           ))}
         </div>
