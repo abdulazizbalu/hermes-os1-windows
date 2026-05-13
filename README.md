@@ -13,14 +13,14 @@ The first slice provides:
 - OS1 boot screen
 - Sidebar and all OS1 section routes
 - Typed secure IPC skeleton
-- Orgo API key verification and secure credential storage
-- Workspace and computer picker
-- Orgo computer creation
+- Local Gemma/Ollama provider with no API key requirement
+- Gemma 4 model detection and pull actions
+- Local Windows/WSL workspace connection flow
 - Windows installer workflow
 
 Upcoming slices add:
 
-- Hermes Agent install on Orgo VM
+- Hermes Agent install for Local Windows/WSL
 - WebSocket terminal
 - Overview, Sessions, Kanban, Files, Skills, Cron, Usage
 - Providers, Voice, Desktop/VNC, Mail, Messaging, Doctor
