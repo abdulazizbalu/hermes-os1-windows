@@ -1,10 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
   ConnectionDraft,
-  CreateOrgoComputerRequest,
-  OrgoConnectionDraft,
+  LocalConnectionDraft,
   OS1Api,
-  SaveOrgoApiKeyRequest,
+  PullLocalModelRequest,
   ipcChannels
 } from "../shared/ipc.js";
 
@@ -16,14 +15,11 @@ const api: OS1Api = {
   connections: {
     list: () => ipcRenderer.invoke(ipcChannels.connectionsList),
     saveDraft: (draft: ConnectionDraft) => ipcRenderer.invoke(ipcChannels.connectionsSaveDraft, draft),
-    saveOrgo: (draft: OrgoConnectionDraft) => ipcRenderer.invoke(ipcChannels.connectionsSaveOrgo, draft)
+    saveLocal: (draft: LocalConnectionDraft) => ipcRenderer.invoke(ipcChannels.connectionsSaveLocal, draft)
   },
-  orgo: {
-    credentialStatus: () => ipcRenderer.invoke(ipcChannels.orgoCredentialStatus),
-    saveApiKey: (request: SaveOrgoApiKeyRequest) => ipcRenderer.invoke(ipcChannels.orgoSaveApiKey, request),
-    clearApiKey: () => ipcRenderer.invoke(ipcChannels.orgoClearApiKey),
-    listWorkspaces: () => ipcRenderer.invoke(ipcChannels.orgoListWorkspaces),
-    createComputer: (request: CreateOrgoComputerRequest) => ipcRenderer.invoke(ipcChannels.orgoCreateComputer, request)
+  localAi: {
+    status: () => ipcRenderer.invoke(ipcChannels.localAiStatus),
+    pullModel: (request: PullLocalModelRequest) => ipcRenderer.invoke(ipcChannels.localAiPullModel, request)
   }
 };
 

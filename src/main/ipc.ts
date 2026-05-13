@@ -1,17 +1,11 @@
-import { app, ipcMain, safeStorage } from "electron";
+import { app, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import {
-  assertConnectionDraft,
-  assertCreateOrgoComputerRequest,
-  assertOrgoConnectionDraft,
-  ipcChannels
-} from "../shared/ipc.js";
+import { assertConnectionDraft, assertLocalConnectionDraft, assertPullLocalModelRequest, ipcChannels } from "../shared/ipc.js";
 import type { AppInfo, ConnectionSummary } from "../shared/ipc.js";
 import { getOS1AppPaths } from "./appPaths.js";
-import { createEncryptedFileCredentialStore } from "./credentialStore.js";
-import { OrgoClient } from "./orgoClient.js";
+import { OllamaClient } from "./ollamaClient.js";
 
 async function readConnections(): Promise<ConnectionSummary[]> {
   const paths = getOS1AppPaths();
@@ -29,26 +23,6 @@ async function writeConnections(connections: ConnectionSummary[]): Promise<void>
   const paths = getOS1AppPaths();
   await mkdir(dirname(paths.connections), { recursive: true });
   await writeFile(paths.connections, JSON.stringify(connections, null, 2), "utf8");
-}
-
-function createOrgoCredentialStore() {
-  if (!safeStorage.isEncryptionAvailable()) {
-    throw new Error("Secure credential storage is not available on this Windows account.");
-  }
-
-  return createEncryptedFileCredentialStore({
-    filePath: getOS1AppPaths().orgoApiKey,
-    cipher: {
-      encryptString: (value) => safeStorage.encryptString(value),
-      decryptString: (value) => safeStorage.decryptString(value)
-    }
-  });
-}
-
-async function withOrgoClient<T>(operation: (client: OrgoClient) => Promise<T>): Promise<T> {
-  const apiKey = await createOrgoCredentialStore().load();
-  const client = new OrgoClient({ apiKeyProvider: () => apiKey, fetchImpl: fetch });
-  return operation(client);
 }
 
 export function registerIpcHandlers(): void {
@@ -98,17 +72,16 @@ export function registerIpcHandlers(): void {
     return connection;
   });
 
-  ipcMain.handle(ipcChannels.connectionsSaveOrgo, async (_event, payload: unknown): Promise<ConnectionSummary> => {
-    const draft = assertOrgoConnectionDraft(payload);
+  ipcMain.handle(ipcChannels.connectionsSaveLocal, async (_event, payload: unknown): Promise<ConnectionSummary> => {
+    const draft = assertLocalConnectionDraft(payload);
     const connections = await readConnections();
     const connection: ConnectionSummary = {
       label: draft.label,
-      transport: "orgo",
-      destination: `${draft.workspaceName} / ${draft.computerName}`,
-      workspaceId: draft.workspaceId,
-      workspaceName: draft.workspaceName,
-      computerId: draft.computerId,
-      computerName: draft.computerName,
+      transport: draft.runtime === "wsl" ? "wsl" : "local",
+      destination: `${draft.runtime.toUpperCase()} / ${draft.model}`,
+      runtime: draft.runtime,
+      model: draft.model,
+      workspacePath: draft.workspacePath,
       id: randomUUID(),
       createdAt: new Date().toISOString()
     };
@@ -118,34 +91,14 @@ export function registerIpcHandlers(): void {
     return connection;
   });
 
-  ipcMain.handle(ipcChannels.orgoCredentialStatus, async () => ({
-    hasApiKey: await createOrgoCredentialStore().hasValue()
-  }));
-
-  ipcMain.handle(ipcChannels.orgoSaveApiKey, async (_event, payload: unknown) => {
-    const apiKey = String((payload as { apiKey?: unknown } | undefined)?.apiKey ?? "").trim();
-    if (!apiKey) {
-      throw new Error("Orgo API key is required.");
-    }
-
-    const verifier = new OrgoClient({ apiKeyProvider: () => apiKey, fetchImpl: fetch });
-    await verifier.listWorkspaces();
-    await createOrgoCredentialStore().save(apiKey);
-
-    return { hasApiKey: true };
+  ipcMain.handle(ipcChannels.localAiStatus, async () => {
+    return new OllamaClient().status();
   });
 
-  ipcMain.handle(ipcChannels.orgoClearApiKey, async () => {
-    await createOrgoCredentialStore().clear();
-    return { hasApiKey: false };
-  });
-
-  ipcMain.handle(ipcChannels.orgoListWorkspaces, async () => {
-    return withOrgoClient((client) => client.listWorkspaces());
-  });
-
-  ipcMain.handle(ipcChannels.orgoCreateComputer, async (_event, payload: unknown) => {
-    const request = assertCreateOrgoComputerRequest(payload);
-    return withOrgoClient((client) => client.createComputer(request));
+  ipcMain.handle(ipcChannels.localAiPullModel, async (_event, payload: unknown) => {
+    const request = assertPullLocalModelRequest(payload);
+    const client = new OllamaClient();
+    await client.pullModel(request.model);
+    return client.status(request.model);
   });
 }
