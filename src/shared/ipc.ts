@@ -3,12 +3,9 @@ export const ipcChannels = {
   diagnostics: "app:diagnostics",
   connectionsList: "connections:list",
   connectionsSaveDraft: "connections:saveDraft",
-  connectionsSaveOrgo: "connections:saveOrgo",
-  orgoCredentialStatus: "orgo:credentialStatus",
-  orgoSaveApiKey: "orgo:saveApiKey",
-  orgoClearApiKey: "orgo:clearApiKey",
-  orgoListWorkspaces: "orgo:listWorkspaces",
-  orgoCreateComputer: "orgo:createComputer"
+  connectionsSaveLocal: "connections:saveLocal",
+  localAiStatus: "localAi:status",
+  localAiPullModel: "localAi:pullModel"
 } as const;
 
 export interface AppInfo {
@@ -20,50 +17,49 @@ export interface AppInfo {
 
 export interface ConnectionDraft {
   label: string;
-  transport: "orgo" | "ssh";
+  transport: "local" | "wsl" | "ssh";
   destination: string;
 }
 
-export interface OrgoComputerSummary {
-  id: string;
+export const gemmaModelIds = ["gemma4:e2b", "gemma4:e4b", "gemma4:26b"] as const;
+
+export type GemmaModelId = (typeof gemmaModelIds)[number];
+
+export type LocalRuntime = "windows" | "wsl";
+
+export interface LocalAiModelSummary {
   name: string;
-  status: string;
+  installed: boolean;
+  size?: number;
 }
 
-export interface OrgoWorkspaceSummary {
-  id: string;
-  name: string;
-  computers: OrgoComputerSummary[];
+export interface LocalAiStatus {
+  ollamaInstalled: boolean;
+  ollamaRunning: boolean;
+  recommendedModel: GemmaModelId;
+  selectedModel: GemmaModelId;
+  models: LocalAiModelSummary[];
+  version?: string;
+  error?: string;
 }
 
-export interface OrgoCredentialStatus {
-  hasApiKey: boolean;
+export interface PullLocalModelRequest {
+  model: GemmaModelId;
 }
 
-export interface SaveOrgoApiKeyRequest {
-  apiKey: string;
-}
-
-export interface CreateOrgoComputerRequest {
-  workspaceId: string;
-  computerName: string;
-}
-
-export interface OrgoConnectionDraft {
+export interface LocalConnectionDraft {
   label: string;
-  workspaceId: string;
-  workspaceName: string;
-  computerId: string;
-  computerName: string;
+  runtime: LocalRuntime;
+  model: GemmaModelId;
+  workspacePath: string;
 }
 
 export interface ConnectionSummary extends ConnectionDraft {
   id: string;
   createdAt: string;
-  workspaceId?: string;
-  workspaceName?: string;
-  computerId?: string;
-  computerName?: string;
+  runtime?: LocalRuntime;
+  model?: GemmaModelId;
+  workspacePath?: string;
 }
 
 export interface OS1Api {
@@ -74,14 +70,11 @@ export interface OS1Api {
   connections: {
     list(): Promise<ConnectionSummary[]>;
     saveDraft(draft: ConnectionDraft): Promise<ConnectionSummary>;
-    saveOrgo(draft: OrgoConnectionDraft): Promise<ConnectionSummary>;
+    saveLocal(draft: LocalConnectionDraft): Promise<ConnectionSummary>;
   };
-  orgo: {
-    credentialStatus(): Promise<OrgoCredentialStatus>;
-    saveApiKey(request: SaveOrgoApiKeyRequest): Promise<OrgoCredentialStatus>;
-    clearApiKey(): Promise<OrgoCredentialStatus>;
-    listWorkspaces(): Promise<OrgoWorkspaceSummary[]>;
-    createComputer(request: CreateOrgoComputerRequest): Promise<OrgoComputerSummary>;
+  localAi: {
+    status(): Promise<LocalAiStatus>;
+    pullModel(request: PullLocalModelRequest): Promise<LocalAiStatus>;
   };
 }
 
@@ -103,36 +96,54 @@ export function assertConnectionDraft(value: unknown): ConnectionDraft {
   const destination = requiredTrimmedString(candidate.destination, "Connection destination is required.");
   const transport = candidate.transport;
 
-  if (transport !== "orgo" && transport !== "ssh") {
-    throw new Error("Connection transport must be orgo or ssh.");
+  if (transport !== "local" && transport !== "wsl" && transport !== "ssh") {
+    throw new Error("Connection transport must be local, wsl, or ssh.");
   }
 
   return { label, transport, destination };
 }
 
-export function assertCreateOrgoComputerRequest(value: unknown): CreateOrgoComputerRequest {
+export function assertPullLocalModelRequest(value: unknown): PullLocalModelRequest {
   if (!value || typeof value !== "object") {
-    throw new Error("Create computer request must be an object.");
+    throw new Error("Pull model request must be an object.");
   }
 
   const candidate = value as Record<string, unknown>;
+  const model = requiredTrimmedString(candidate.model, "Gemma model is required.");
+  if (!isGemmaModelId(model)) {
+    throw new Error("Gemma model must be gemma4:e2b, gemma4:e4b, or gemma4:26b.");
+  }
+
   return {
-    workspaceId: requiredTrimmedString(candidate.workspaceId, "Orgo workspace is required."),
-    computerName: requiredTrimmedString(candidate.computerName, "Computer name is required.")
+    model
   };
 }
 
-export function assertOrgoConnectionDraft(value: unknown): OrgoConnectionDraft {
+export function assertLocalConnectionDraft(value: unknown): LocalConnectionDraft {
   if (!value || typeof value !== "object") {
-    throw new Error("Orgo connection draft must be an object.");
+    throw new Error("Local connection draft must be an object.");
   }
 
   const candidate = value as Record<string, unknown>;
+  const runtime = requiredTrimmedString(candidate.runtime, "Local runtime is required.");
+  const model = requiredTrimmedString(candidate.model, "Gemma model is required.");
+
+  if (runtime !== "windows" && runtime !== "wsl") {
+    throw new Error("Local runtime must be windows or wsl.");
+  }
+
+  if (!isGemmaModelId(model)) {
+    throw new Error("Gemma model must be gemma4:e2b, gemma4:e4b, or gemma4:26b.");
+  }
+
   return {
     label: requiredTrimmedString(candidate.label, "Connection label is required."),
-    workspaceId: requiredTrimmedString(candidate.workspaceId, "Orgo workspace is required."),
-    workspaceName: requiredTrimmedString(candidate.workspaceName, "Workspace name is required."),
-    computerId: requiredTrimmedString(candidate.computerId, "Orgo computer is required."),
-    computerName: requiredTrimmedString(candidate.computerName, "Computer name is required.")
+    runtime,
+    model,
+    workspacePath: requiredTrimmedString(candidate.workspacePath, "Workspace path is required.")
   };
+}
+
+function isGemmaModelId(model: string): model is GemmaModelId {
+  return gemmaModelIds.includes(model as GemmaModelId);
 }

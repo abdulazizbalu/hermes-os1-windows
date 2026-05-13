@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { assertConnectionDraft, assertCreateOrgoComputerRequest, assertOrgoConnectionDraft } from "./ipc.js";
+import { assertConnectionDraft, assertLocalConnectionDraft, assertPullLocalModelRequest } from "./ipc.js";
 
 describe("assertConnectionDraft", () => {
   it("normalizes valid connection drafts", () => {
     expect(
       assertConnectionDraft({
-        label: " Orgo VM ",
-        transport: "orgo",
-        destination: " workspace "
+        label: " Local Gemma ",
+        transport: "local",
+        destination: " Ollama / gemma4:e4b "
       })
     ).toEqual({
-      label: "Orgo VM",
-      transport: "orgo",
-      destination: "workspace"
+      label: "Local Gemma",
+      transport: "local",
+      destination: "Ollama / gemma4:e4b"
     });
   });
 
@@ -20,55 +20,56 @@ describe("assertConnectionDraft", () => {
     expect(() =>
       assertConnectionDraft({
         label: "",
-        transport: "orgo",
+        transport: "local",
         destination: "workspace"
       })
     ).toThrow("Connection label is required.");
   });
 });
 
-describe("assertOrgoConnectionDraft", () => {
-  it("normalizes valid Orgo connection drafts", () => {
+describe("assertLocalConnectionDraft", () => {
+  it("normalizes valid local connection drafts", () => {
     expect(
-      assertOrgoConnectionDraft({
-        label: " OS1 VM ",
-        workspaceId: " workspace-1 ",
-        workspaceName: " Main ",
-        computerId: " computer-1 ",
-        computerName: " Hermes "
+      assertLocalConnectionDraft({
+        label: " Gemma Workspace ",
+        runtime: " wsl ",
+        model: " gemma4:e4b ",
+        workspacePath: " C:\\Users\\User "
       })
     ).toEqual({
-      label: "OS1 VM",
-      workspaceId: "workspace-1",
-      workspaceName: "Main",
-      computerId: "computer-1",
-      computerName: "Hermes"
+      label: "Gemma Workspace",
+      runtime: "wsl",
+      model: "gemma4:e4b",
+      workspacePath: "C:\\Users\\User"
     });
   });
 
-  it("rejects missing workspace and computer ids", () => {
+  it("rejects unsupported runtimes", () => {
     expect(() =>
-      assertOrgoConnectionDraft({
-        label: "OS1 VM",
-        workspaceId: "",
-        workspaceName: "Main",
-        computerId: "",
-        computerName: "Hermes"
+      assertLocalConnectionDraft({
+        label: "Gemma Workspace",
+        runtime: "cloud",
+        model: "gemma4:e4b",
+        workspacePath: "C:\\Users\\User"
       })
-    ).toThrow("Orgo workspace is required.");
+    ).toThrow("Local runtime must be windows or wsl.");
   });
 });
 
-describe("assertCreateOrgoComputerRequest", () => {
-  it("normalizes computer creation requests", () => {
+describe("assertPullLocalModelRequest", () => {
+  it("normalizes supported Gemma model pull requests", () => {
     expect(
-      assertCreateOrgoComputerRequest({
-        workspaceId: " workspace-1 ",
-        computerName: " My Computer "
+      assertPullLocalModelRequest({
+        model: " gemma4:26b "
       })
     ).toEqual({
-      workspaceId: "workspace-1",
-      computerName: "My Computer"
+      model: "gemma4:26b"
     });
+  });
+
+  it("rejects unsupported local models", () => {
+    expect(() => assertPullLocalModelRequest({ model: "llama3.2" })).toThrow(
+      "Gemma model must be gemma4:e2b, gemma4:e4b, or gemma4:26b."
+    );
   });
 });
