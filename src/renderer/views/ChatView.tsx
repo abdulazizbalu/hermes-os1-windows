@@ -1,6 +1,7 @@
-import { Plus } from "lucide-react";
-import { FormEvent, ReactElement, useEffect, useRef, useState } from "react";
+import { Plus, Sparkles } from "lucide-react";
+import { FormEvent, ReactElement, useContext, useEffect, useRef, useState } from "react";
 import { GemmaModelId, HistoryConversation, LocalAiStatus } from "../../shared/ipc";
+import { NurAppContext } from "../AppContext";
 import { SectionFrame } from "../components/SectionFrame";
 import { StatusPill } from "../components/StatusPill";
 
@@ -12,6 +13,7 @@ interface ChatMessage {
 }
 
 export function ChatView(): ReactElement {
+  const appCtx = useContext(NurAppContext);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -36,9 +38,11 @@ export function ChatView(): ReactElement {
     }
   }, [messages]);
 
-  const selectedModel: GemmaModelId = localAiStatus?.selectedModel ?? "gemma4:e4b";
-  const modelReady =
-    localAiStatus?.models.find((item) => item.name === selectedModel)?.installed ?? false;
+  const installedModel = localAiStatus?.models.find((item) => item.installed)?.name as
+    | GemmaModelId
+    | undefined;
+  const selectedModel: GemmaModelId = installedModel ?? localAiStatus?.selectedModel ?? "gemma4:e2b";
+  const modelReady = Boolean(installedModel);
   const canSend = Boolean(localAiStatus?.ollamaRunning && modelReady && !isSending);
 
   function startNewConversation(): void {
@@ -127,11 +131,41 @@ export function ChatView(): ReactElement {
   const readinessTone: "muted" | "warning" | "success" =
     !localAiStatus?.ollamaRunning ? "muted" : !modelReady ? "warning" : "success";
 
+  // Show inviting setup CTA instead of bare chat if the model isn't ready.
+  if (localAiStatus && !modelReady) {
+    return (
+      <SectionFrame
+        eyebrow="Чат"
+        title="Спросите Nur"
+        description="Свободный диалог с локальной AI-моделью. Один раз нужно скачать модель ≈ 2 ГБ."
+      >
+        <div className="setup-cta">
+          <div className="setup-cta__icon" aria-hidden="true">
+            <Sparkles size={32} />
+          </div>
+          <h2>AI ещё не настроен</h2>
+          <p>
+            Чтобы пользоваться чатом и другими AI-функциями, нужно один раз скачать модель.
+            Это бесплатно и работает потом без интернета.
+          </p>
+          {appCtx ? (
+            <button className="welcome__primary" type="button" onClick={appCtx.launchWizard}>
+              Настроить AI ({"≈"} 2 ГБ)
+            </button>
+          ) : null}
+          <p className="setup-cta__alt">
+            А пока — Конвертер и Транслитерация уже работают, AI для них не нужен.
+          </p>
+        </div>
+      </SectionFrame>
+    );
+  }
+
   return (
     <SectionFrame
       eyebrow="Чат"
       title="Спросите Nur"
-      description="Свободный диалог с локальной Gemma 4. Разговоры сохраняются в раздел «История»."
+      description="Свободный диалог с локальной AI-моделью. Разговоры сохраняются в раздел «История»."
     >
       <div className="chat-shell">
         <div className="chat-status">

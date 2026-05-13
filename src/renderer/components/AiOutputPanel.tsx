@@ -1,5 +1,6 @@
-import { Copy } from "lucide-react";
-import { ReactElement, useState } from "react";
+import { Copy, Sparkles } from "lucide-react";
+import { ReactElement, useContext, useState } from "react";
+import { NurAppContext } from "../AppContext";
 import { StatusPill } from "./StatusPill";
 
 interface AiOutputPanelProps {
@@ -17,8 +18,9 @@ export function AiOutputPanel({
   output,
   error,
   placeholder = "Здесь появится результат от Nur.",
-  notReadyMessage = "Подготовьте Gemma в разделе «Настройки»."
+  notReadyMessage = "Чтобы эта функция работала, нужно настроить AI."
 }: AiOutputPanelProps): ReactElement {
+  const appCtx = useContext(NurAppContext);
   const [copied, setCopied] = useState(false);
 
   async function copyOutput(): Promise<void> {
@@ -47,7 +49,15 @@ export function AiOutputPanel({
       </header>
       <div className="ai-output__body">
         {!ready ? (
-          <p className="ai-output__hint">{notReadyMessage}</p>
+          <div className="ai-output__not-ready">
+            <Sparkles size={20} aria-hidden="true" />
+            <p>{notReadyMessage}</p>
+            {appCtx ? (
+              <button type="button" className="welcome__primary ai-output__cta" onClick={appCtx.launchWizard}>
+                Настроить AI ({"≈"} 2 ГБ)
+              </button>
+            ) : null}
+          </div>
         ) : busy ? (
           <p className="ai-output__hint">
             <StatusPill tone="muted">ДУМАЮ</StatusPill>

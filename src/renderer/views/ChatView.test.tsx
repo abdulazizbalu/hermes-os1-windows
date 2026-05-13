@@ -58,19 +58,19 @@ describe("ChatView", () => {
     expect(screen.getByText("Привет")).toBeInTheDocument();
   });
 
-  it("disables sending when Ollama is not running", async () => {
+  it("shows setup CTA when no model is installed", async () => {
     vi.mocked(window.os1.localAi.status).mockResolvedValueOnce({
       ollamaInstalled: true,
       ollamaRunning: false,
-      recommendedModel: "gemma4:e4b",
-      selectedModel: "gemma4:e4b",
+      recommendedModel: "gemma4:e2b",
+      selectedModel: "gemma4:e2b",
       models: []
     });
     render(<ChatView />);
 
-    await waitFor(() => expect(screen.getByText("OLLAMA ВЫКЛ")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "AI ещё не настроен" })).toBeInTheDocument());
 
-    expect(screen.getByRole("button", { name: "Отправить" })).toBeDisabled();
-    expect(screen.getByPlaceholderText("Подготовьте Gemma в разделе «Настройки»")).toBeDisabled();
+    // Chat composer is not rendered in CTA mode
+    expect(screen.queryByRole("button", { name: "Отправить" })).not.toBeInTheDocument();
   });
 });

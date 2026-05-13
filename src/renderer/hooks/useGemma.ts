@@ -22,10 +22,9 @@ export function useGemma(): UseGemmaResult {
     void window.os1.localAi.status().then(setStatus);
   }, []);
 
-  const model: GemmaModelId = status?.selectedModel ?? "gemma4:e4b";
-  const ready =
-    Boolean(status?.ollamaRunning) &&
-    Boolean(status?.models.find((item) => item.name === model)?.installed);
+  const installedModel = status?.models.find((m) => m.installed)?.name as GemmaModelId | undefined;
+  const model: GemmaModelId = installedModel ?? status?.selectedModel ?? "gemma4:e2b";
+  const ready = Boolean(status?.ollamaRunning) && Boolean(installedModel);
 
   const run = useCallback(
     async (prompt: string): Promise<void> => {
