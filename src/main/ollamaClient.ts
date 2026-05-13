@@ -28,6 +28,10 @@ interface PullResponse {
   status: string;
 }
 
+interface GenerateResponse {
+  response: string;
+}
+
 const execFileAsync = promisify(execFile);
 
 async function defaultRunCommand(command: string, args: string[]): Promise<CommandResult> {
@@ -51,7 +55,7 @@ export class OllamaClient {
     this.runCommand = runCommand;
   }
 
-  async status(selectedModel: GemmaModelId = "gemma4:e4b"): Promise<LocalAiStatus> {
+  async status(selectedModel: GemmaModelId = "gemma4:e2b"): Promise<LocalAiStatus> {
     const version = await this.detectVersion();
 
     try {
@@ -68,7 +72,7 @@ export class OllamaClient {
       return {
         ollamaInstalled: true,
         ollamaRunning: true,
-        recommendedModel: "gemma4:e4b",
+        recommendedModel: "gemma4:e2b",
         selectedModel,
         version,
         models: gemmaModelIds.map((model) => ({
@@ -81,7 +85,7 @@ export class OllamaClient {
       return {
         ollamaInstalled: version !== undefined,
         ollamaRunning: false,
-        recommendedModel: "gemma4:e4b",
+        recommendedModel: "gemma4:e2b",
         selectedModel,
         ...(version ? { version } : {}),
         error: `Ollama is not running on ${this.serverUrl}.`,
@@ -107,6 +111,30 @@ export class OllamaClient {
     }
 
     return response.json() as Promise<PullResponse>;
+  }
+
+  async generateText(model: GemmaModelId, prompt: string): Promise<GenerateResponse> {
+    let response: Response;
+    try {
+      response = await this.fetchImpl(`${this.baseUrl}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          prompt,
+          system: "Отвечай только на русском языке. Пиши ясно, дружелюбно и кратко.",
+          stream: false
+        })
+      });
+    } catch {
+      throw new Error(`Ollama is not running on ${this.serverUrl}.`);
+    }
+
+    if (!response.ok) {
+      throw new Error(`Ollama generation failed: HTTP ${response.status}`);
+    }
+
+    return response.json() as Promise<GenerateResponse>;
   }
 
   private async detectVersion(): Promise<string | undefined> {

@@ -9,22 +9,22 @@ export function getSectionView(section: OS1SectionId): ComponentType {
   }
 
   const titles: Record<OS1SectionId, string> = {
-    connections: "Connections",
-    overview: "Overview",
-    sessions: "Sessions",
-    cronjobs: "Cron Jobs",
-    kanban: "Kanban",
-    files: "Files",
-    usage: "Usage",
-    skills: "Skills",
-    knowledgeBase: "Knowledge Base",
-    connectors: "Connectors",
-    providers: "Providers",
-    mail: "Mail",
-    messaging: "Messaging",
-    terminal: "Terminal",
-    doctor: "Doctor",
-    desktop: "Desktop"
+    connections: "Подключения",
+    overview: "Обзор",
+    sessions: "Сессии",
+    cronjobs: "Cron-задачи",
+    kanban: "Канбан",
+    files: "Файлы",
+    usage: "Использование",
+    skills: "Навыки",
+    knowledgeBase: "База знаний",
+    connectors: "Коннекторы",
+    providers: "Провайдеры",
+    mail: "Почта",
+    messaging: "Сообщения",
+    terminal: "Терминал",
+    doctor: "Диагностика",
+    desktop: "Рабочий стол"
   };
 
   return function View(): ReactElement {
@@ -32,7 +32,7 @@ export function getSectionView(section: OS1SectionId): ComponentType {
       <SectionStubView
         eyebrow={titles[section]}
         title={titles[section]}
-        description={`${titles[section]} will keep the same OS1 host-first workflow when its parity slice is implemented.`}
+        description={`${titles[section]} сохранит OS1 workflow вокруг локального хоста, когда будет реализован этот слой.`}
       />
     );
   };

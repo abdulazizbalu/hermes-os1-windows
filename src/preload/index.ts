@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
   ConnectionDraft,
+  GenerateLocalTextRequest,
   LocalConnectionDraft,
   OS1Api,
   PullLocalModelRequest,
@@ -19,7 +20,8 @@ const api: OS1Api = {
   },
   localAi: {
     status: () => ipcRenderer.invoke(ipcChannels.localAiStatus),
-    pullModel: (request: PullLocalModelRequest) => ipcRenderer.invoke(ipcChannels.localAiPullModel, request)
+    pullModel: (request: PullLocalModelRequest) => ipcRenderer.invoke(ipcChannels.localAiPullModel, request),
+    generateText: (request: GenerateLocalTextRequest) => ipcRenderer.invoke(ipcChannels.localAiGenerateText, request)
   }
 };
 

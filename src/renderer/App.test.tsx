@@ -22,11 +22,12 @@ beforeEach(() => {
       status: vi.fn().mockResolvedValue({
         ollamaInstalled: false,
         ollamaRunning: false,
-        recommendedModel: "gemma4:e4b",
-        selectedModel: "gemma4:e4b",
+        recommendedModel: "gemma4:e2b",
+        selectedModel: "gemma4:e2b",
         models: []
       }),
-      pullModel: vi.fn()
+      pullModel: vi.fn(),
+      generateText: vi.fn()
     }
   };
 });
@@ -36,17 +37,17 @@ describe("OS1 shell", () => {
     render(<App />);
 
     expect(screen.getByText("OS1")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Begin" })).toBeEnabled(), { timeout: 2000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Начать" })).toBeEnabled(), { timeout: 2000 });
   });
 
   it("enters workspace and opens section routes", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Begin" })).toBeEnabled(), { timeout: 2000 });
-    await user.click(screen.getByRole("button", { name: "Begin" }));
-    await user.click(screen.getByRole("button", { name: "Terminal" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Начать" })).toBeEnabled(), { timeout: 2000 });
+    await user.click(screen.getByRole("button", { name: "Начать" }));
+    await user.click(screen.getByRole("button", { name: "Терминал" }));
 
-    expect(screen.getByRole("heading", { name: "Terminal" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Терминал" })).toBeInTheDocument();
   });
 });

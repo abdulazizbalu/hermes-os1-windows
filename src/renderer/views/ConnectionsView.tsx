@@ -10,19 +10,20 @@ const modelLabels: Record<GemmaModelId, string> = {
 };
 
 const modelDescriptions: Record<GemmaModelId, string> = {
-  "gemma4:e2b": "Light local model",
-  "gemma4:e4b": "Recommended local model",
-  "gemma4:26b": "Workstation model"
+  "gemma4:e2b": "Быстрый старт",
+  "gemma4:e4b": "Баланс качества",
+  "gemma4:26b": "Мощная рабочая станция"
 };
 
 export function ConnectionsView(): ReactElement {
   const [connections, setConnections] = useState<ConnectionSummary[]>([]);
   const [localAiStatus, setLocalAiStatus] = useState<LocalAiStatus | undefined>();
-  const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e4b");
+  const [selectedModel, setSelectedModel] = useState<GemmaModelId>("gemma4:e2b");
   const [runtime, setRuntime] = useState<LocalRuntime>("windows");
-  const [label, setLabel] = useState("Local Gemma");
+  const [label, setLabel] = useState("Локальная Gemma");
   const [workspacePath, setWorkspacePath] = useState("C:\\Users\\User");
-  const [status, setStatus] = useState("Ready.");
+  const [status, setStatus] = useState("Готово.");
+  const [russianCheck, setRussianCheck] = useState("");
   const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
@@ -36,9 +37,9 @@ export function ConnectionsView(): ReactElement {
       const nextStatus = await window.os1.localAi.status();
       setLocalAiStatus(nextStatus);
       setSelectedModel(nextStatus.selectedModel);
-      setStatus(nextStatus.ollamaRunning ? "Ollama ready." : nextStatus.error ?? "Ollama not running.");
+      setStatus(nextStatus.ollamaRunning ? "Ollama готов." : nextStatus.error ?? "Ollama не запущен.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not detect Ollama.");
+      setStatus(error instanceof Error ? error.message : "Не удалось проверить Ollama.");
     } finally {
       setIsBusy(false);
     }
@@ -49,9 +50,25 @@ export function ConnectionsView(): ReactElement {
     try {
       const nextStatus = await window.os1.localAi.pullModel({ model: selectedModel });
       setLocalAiStatus(nextStatus);
-      setStatus(`${modelLabels[selectedModel]} installed.`);
+      setStatus(`${modelLabels[selectedModel]} установлена.`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not pull Gemma 4.");
+      setStatus(error instanceof Error ? error.message : "Не удалось скачать Gemma 4.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function checkRussian(): Promise<void> {
+    setIsBusy(true);
+    try {
+      const result = await window.os1.localAi.generateText({
+        model: selectedModel,
+        prompt: "Скажи по-русски, что Gemma 4 готова к работе."
+      });
+      setRussianCheck(result.response);
+      setStatus("Русский ответ получен.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Не удалось проверить русский язык.");
     } finally {
       setIsBusy(false);
     }
@@ -66,7 +83,7 @@ export function ConnectionsView(): ReactElement {
       workspacePath
     });
     setConnections((current) => [saved, ...current]);
-    setStatus(`Saved ${saved.label}.`);
+    setStatus(`Сохранено: ${saved.label}.`);
   }
 
   function isModelInstalled(model: GemmaModelId): boolean {
@@ -75,31 +92,35 @@ export function ConnectionsView(): ReactElement {
 
   return (
     <SectionFrame
-      eyebrow="Connections"
-      title="Local Gemma"
-      description="Run OS1 against a free local Gemma 4 model through Ollama instead of a cloud computer provider."
+      eyebrow="Подключения"
+      title="Локальная Gemma 4"
+      description="OS1 работает бесплатно на локальной Gemma 4 через Ollama, без ключей и без облачного провайдера."
     >
       <div className="connections-grid">
         <div className="local-ai-grid">
           <section className="panel-form">
             <div className="local-ai-status">
               <StatusPill tone={localAiStatus?.ollamaRunning ? "success" : "warning"}>
-                {localAiStatus?.ollamaRunning ? "OLLAMA READY" : "OLLAMA OFF"}
+                {localAiStatus?.ollamaRunning ? "OLLAMA ГОТОВ" : "OLLAMA ВЫКЛ"}
               </StatusPill>
-              {localAiStatus?.version ? <span>Ollama {localAiStatus.version}</span> : <span>Ollama not detected</span>}
+              {localAiStatus?.version ? <span>Ollama {localAiStatus.version}</span> : <span>Ollama не найден</span>}
             </div>
             <div className="local-actions">
               <button className="os1-button" type="button" onClick={detectOllama} disabled={isBusy}>
-                Detect Ollama
+                Проверить Ollama
               </button>
               <button className="os1-button" type="button" onClick={pullModel} disabled={isBusy}>
-                Pull Gemma 4
+                Скачать Gemma 4
+              </button>
+              <button className="os1-button" type="button" onClick={checkRussian} disabled={isBusy}>
+                Проверить русский
               </button>
             </div>
             <p>{status}</p>
+            {russianCheck ? <p className="russian-check">{russianCheck}</p> : null}
           </section>
 
-          <div className="model-grid" aria-label="Gemma models">
+          <div className="model-grid" aria-label="Модели Gemma">
             {gemmaModelIds.map((model) => (
               <button
                 className={model === selectedModel ? "model-card model-card--selected" : "model-card"}
@@ -110,7 +131,7 @@ export function ConnectionsView(): ReactElement {
                 <span>{modelLabels[model]}</span>
                 <small>{modelDescriptions[model]}</small>
                 <StatusPill tone={isModelInstalled(model) ? "success" : "muted"}>
-                  {isModelInstalled(model) ? "INSTALLED" : "LOCAL"}
+                  {isModelInstalled(model) ? "УСТАНОВЛЕНА" : "ЛОКАЛЬНО"}
                 </StatusPill>
               </button>
             ))}
@@ -118,11 +139,11 @@ export function ConnectionsView(): ReactElement {
 
           <form className="panel-form" onSubmit={saveConnection}>
             <label htmlFor="local-connection-label">
-              <span>Connection name</span>
+              <span>Название подключения</span>
               <input id="local-connection-label" value={label} onChange={(event) => setLabel(event.target.value)} />
             </label>
             <label htmlFor="local-runtime">
-              <span>Runtime</span>
+              <span>Среда</span>
               <select
                 id="local-runtime"
                 value={runtime}
@@ -133,23 +154,23 @@ export function ConnectionsView(): ReactElement {
               </select>
             </label>
             <label htmlFor="local-workspace-path">
-              <span>Workspace path</span>
+              <span>Папка workspace</span>
               <input
                 id="local-workspace-path"
-                aria-label="Workspace path"
+                aria-label="Папка workspace"
                 value={workspacePath}
                 onChange={(event) => setWorkspacePath(event.target.value)}
               />
             </label>
-            <button className="os1-button" type="submit" disabled={isBusy}>
-              Save Local Workspace
+            <button className="os1-button" type="submit">
+              Сохранить локальный workspace
             </button>
           </form>
         </div>
 
         <div className="connection-list">
           <StatusPill tone={connections.length > 0 ? "success" : "muted"}>
-            {connections.length > 0 ? "CONNECTIONS" : "NO HOSTS"}
+            {connections.length > 0 ? "ПОДКЛЮЧЕНИЯ" : "НЕТ ХОСТОВ"}
           </StatusPill>
           {connections.map((connection) => (
             <article key={connection.id} className="connection-card">

@@ -5,7 +5,8 @@ export const ipcChannels = {
   connectionsSaveDraft: "connections:saveDraft",
   connectionsSaveLocal: "connections:saveLocal",
   localAiStatus: "localAi:status",
-  localAiPullModel: "localAi:pullModel"
+  localAiPullModel: "localAi:pullModel",
+  localAiGenerateText: "localAi:generateText"
 } as const;
 
 export interface AppInfo {
@@ -47,6 +48,15 @@ export interface PullLocalModelRequest {
   model: GemmaModelId;
 }
 
+export interface GenerateLocalTextRequest {
+  model: GemmaModelId;
+  prompt: string;
+}
+
+export interface GenerateLocalTextResponse {
+  response: string;
+}
+
 export interface LocalConnectionDraft {
   label: string;
   runtime: LocalRuntime;
@@ -75,6 +85,7 @@ export interface OS1Api {
   localAi: {
     status(): Promise<LocalAiStatus>;
     pullModel(request: PullLocalModelRequest): Promise<LocalAiStatus>;
+    generateText(request: GenerateLocalTextRequest): Promise<GenerateLocalTextResponse>;
   };
 }
 
@@ -116,6 +127,23 @@ export function assertPullLocalModelRequest(value: unknown): PullLocalModelReque
 
   return {
     model
+  };
+}
+
+export function assertGenerateLocalTextRequest(value: unknown): GenerateLocalTextRequest {
+  if (!value || typeof value !== "object") {
+    throw new Error("Generate text request must be an object.");
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const model = requiredTrimmedString(candidate.model, "Gemma model is required.");
+  if (!isGemmaModelId(model)) {
+    throw new Error("Gemma model must be gemma4:e2b, gemma4:e4b, or gemma4:26b.");
+  }
+
+  return {
+    model,
+    prompt: requiredTrimmedString(candidate.prompt, "Prompt is required.")
   };
 }
 

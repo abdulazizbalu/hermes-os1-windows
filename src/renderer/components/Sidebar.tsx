@@ -52,9 +52,9 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
       <div className="sidebar__scroll os1-scroll">
         <BrandLockup />
         <section className="sidebar-card">
-          <h2>No active host</h2>
-          <p>Connect a Local Gemma or SSH host.</p>
-          <StatusPill tone="muted">OFFLINE</StatusPill>
+          <h2>Нет активного хоста</h2>
+          <p>Подключите Local Gemma или SSH-хост.</p>
+          <StatusPill tone="muted">ОФЛАЙН</StatusPill>
         </section>
         <nav className="sidebar__nav" aria-label="OS1 sections">
           {os1Sections.map((section) => {
@@ -77,8 +77,8 @@ export function Sidebar({ activeSection, onSelectSection }: SidebarProps): React
       </div>
       <button className="voice-row" type="button">
         <MicOff size={16} aria-hidden="true" />
-        <span>Voice</span>
-        <strong>OFF</strong>
+        <span>Голос</span>
+        <strong>ВЫКЛ</strong>
       </button>
     </aside>
   );

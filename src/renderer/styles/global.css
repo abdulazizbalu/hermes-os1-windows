@@ -422,6 +422,13 @@ button {
   font-size: 13px;
 }
 
+.panel-form .russian-check {
+  padding: 10px 12px;
+  border: 1px solid rgba(56, 40, 30, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .local-actions {
   display: flex;
   flex-wrap: wrap;

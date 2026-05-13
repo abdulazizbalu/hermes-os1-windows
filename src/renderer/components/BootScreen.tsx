@@ -19,9 +19,9 @@ export function BootScreen({ onComplete }: BootScreenProps): ReactElement {
       <div className="boot-screen__center">
         <div className="boot-screen__ring" aria-hidden="true" />
         <h1>OS1</h1>
-        <p>Hermes workspace for Windows</p>
+        <p>Рабочее пространство Hermes для Windows</p>
         <button className="os1-button" type="button" disabled={!ready} onClick={onComplete}>
-          {ready ? "Begin" : "Starting"}
+          {ready ? "Начать" : "Запуск"}
         </button>
       </div>
     </main>

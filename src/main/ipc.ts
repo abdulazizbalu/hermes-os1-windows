@@ -2,7 +2,13 @@ import { app, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { assertConnectionDraft, assertLocalConnectionDraft, assertPullLocalModelRequest, ipcChannels } from "../shared/ipc.js";
+import {
+  assertConnectionDraft,
+  assertGenerateLocalTextRequest,
+  assertLocalConnectionDraft,
+  assertPullLocalModelRequest,
+  ipcChannels
+} from "../shared/ipc.js";
 import type { AppInfo, ConnectionSummary } from "../shared/ipc.js";
 import { getOS1AppPaths } from "./appPaths.js";
 import { OllamaClient } from "./ollamaClient.js";
@@ -100,5 +106,10 @@ export function registerIpcHandlers(): void {
     const client = new OllamaClient();
     await client.pullModel(request.model);
     return client.status(request.model);
+  });
+
+  ipcMain.handle(ipcChannels.localAiGenerateText, async (_event, payload: unknown) => {
+    const request = assertGenerateLocalTextRequest(payload);
+    return new OllamaClient().generateText(request.model, request.prompt);
   });
 }

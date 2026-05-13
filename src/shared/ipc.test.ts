@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { assertConnectionDraft, assertLocalConnectionDraft, assertPullLocalModelRequest } from "./ipc.js";
+import {
+  assertConnectionDraft,
+  assertGenerateLocalTextRequest,
+  assertLocalConnectionDraft,
+  assertPullLocalModelRequest
+} from "./ipc.js";
 
 describe("assertConnectionDraft", () => {
   it("normalizes valid connection drafts", () => {
@@ -71,5 +76,19 @@ describe("assertPullLocalModelRequest", () => {
     expect(() => assertPullLocalModelRequest({ model: "llama3.2" })).toThrow(
       "Gemma model must be gemma4:e2b, gemma4:e4b, or gemma4:26b."
     );
+  });
+});
+
+describe("assertGenerateLocalTextRequest", () => {
+  it("normalizes Russian local generation requests", () => {
+    expect(
+      assertGenerateLocalTextRequest({
+        model: " gemma4:e2b ",
+        prompt: " Привет, ответь на русском. "
+      })
+    ).toEqual({
+      model: "gemma4:e2b",
+      prompt: "Привет, ответь на русском."
+    });
   });
 });

@@ -14,7 +14,8 @@ The first slice provides:
 - Sidebar and all OS1 section routes
 - Typed secure IPC skeleton
 - Local Gemma/Ollama provider with no API key requirement
-- Gemma 4 model detection and pull actions
+- Gemma 4 starter model flow with Russian response check
+- Russian UI for the boot, sidebar, sections, and Local Gemma setup
 - Local Windows/WSL workspace connection flow
 - Windows installer workflow
 
