@@ -1,5 +1,6 @@
 import { ComponentType, ReactElement } from "react";
 import { NurSectionId } from "../../shared/sections";
+import { ChatView } from "./ChatView";
 import { SettingsView } from "./SettingsView";
 import { SectionStubView } from "./SectionStubView";
 
@@ -35,6 +36,9 @@ const sectionMeta: Record<NurSectionId, { title: string; description: string }> 
 };
 
 export function getSectionView(section: NurSectionId): ComponentType {
+  if (section === "chat") {
+    return ChatView;
+  }
   if (section === "settings") {
     return SettingsView;
   }
