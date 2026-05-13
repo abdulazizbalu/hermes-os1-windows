@@ -5,6 +5,7 @@ export interface OS1AppPaths {
   appData: string;
   logs: string;
   connections: string;
+  orgoApiKey: string;
 }
 
 export function getOS1AppPaths(): OS1AppPaths {
@@ -13,6 +14,7 @@ export function getOS1AppPaths(): OS1AppPaths {
   return {
     appData,
     logs: join(appData, "logs"),
-    connections: join(appData, "connections.json")
+    connections: join(appData, "connections.json"),
+    orgoApiKey: join(appData, "secure", "orgo-api-key.json")
   };
 }

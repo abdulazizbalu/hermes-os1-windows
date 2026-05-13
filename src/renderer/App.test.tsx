@@ -15,7 +15,15 @@ beforeEach(() => {
         ...draft,
         id: "connection-1",
         createdAt: "2026-05-12T00:00:00.000Z"
-      }))
+      })),
+      saveOrgo: vi.fn()
+    },
+    orgo: {
+      credentialStatus: vi.fn().mockResolvedValue({ hasApiKey: false }),
+      saveApiKey: vi.fn().mockResolvedValue({ hasApiKey: true }),
+      clearApiKey: vi.fn().mockResolvedValue({ hasApiKey: false }),
+      listWorkspaces: vi.fn().mockResolvedValue([]),
+      createComputer: vi.fn()
     }
   };
 });
